@@ -9,11 +9,14 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -23,7 +26,9 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.os.HandlerCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.focal.databinding.FragmentSquatBinding
 import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.common.InputImage
@@ -36,6 +41,9 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import org.tensorflow.lite.task.gms.vision.detector.Detection
 import java.nio.ByteBuffer
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.LocalTime
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
@@ -56,6 +64,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
     private var graphicOverlay : GraphicOverlay? = null
+    private var timeRemaining : LocalTime? = null
 
 
 
@@ -68,15 +77,17 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         return fragmentSquatBinding.root
     }
 
-    @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission", "NewApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         objectDetectorHelper = ObjectDetectorHelper(
             context = requireContext(),
             objectDetectorListener = this)
         graphicOverlay = fragmentSquatBinding.graphicOverlay
+        timeRemaining = LocalTime.now().plusSeconds(20)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun setUpCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         cameraProviderFuture.addListener(
@@ -88,6 +99,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         )
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("UnsafeOptInUsageError")
     private fun bindCameraUseCases(){
 
@@ -109,9 +121,10 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             cameraExecutor,
             ImageAnalysis.Analyzer { image: ImageProxy ->
                 try {
-//                    val frameStartMs = SystemClock.elapsedRealtime()
-//                    var bitmap: Bitmap? = null
-//                    bitmap = bitmapBuffer
+                    if(LocalTime.now().isAfter(timeRemaining)) {
+                        postExerciseDashboard()
+                    }
+
                     val imageToUse = InputImage.fromMediaImage(image.image!!, image.imageInfo.rotationDegrees)
                     poseDetector.process(imageToUse).continueWith { task ->
                         val pose = task.getResult()
@@ -164,12 +177,19 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         }
     }
 
+    private fun postExerciseDashboard(){
+        val mainThreadHandler : Handler = HandlerCompat.createAsync(Looper.getMainLooper())
+        mainThreadHandler.post{
+            findNavController().navigate(R.id.action_SquatFragment_to_HomeFragment)
+        }
+    }
     private fun detectObjects(image: ImageProxy) {
         image.use { bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
         val imageRotation = image.imageInfo.rotationDegrees
         objectDetectorHelper.detect(bitmapBuffer, imageRotation)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun processPose(pose: Pose, bitmap: Bitmap? = null){
         try{
             val leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER)
@@ -202,7 +222,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             val rElbowConf = rightElbow?.inFrameLikelihood
 
 
-            Log.e(TAG,"**CONFIDENCE LEVELS OF LANDMARKS**\nEyes: $lEyeConf $rEyeConf\nElbows: $lElbowConf $rElbowConf")
+//            Log.e(TAG,"**CONFIDENCE LEVELS OF LANDMARKS**\nEyes: $lEyeConf $rEyeConf\nElbows: $lElbowConf $rElbowConf")
 
             val graphicOverlay = graphicOverlay!!
             graphicOverlay.clear()
@@ -221,14 +241,18 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             val avgHipAngle = (leftHipAngle + rightHipAngle) / 2
 
             //Log average values to console
-            Log.e(TAG,"Angle of elbows: $avgElbowAngle" )
-            Log.e(TAG, "Angle of knees: $avgKneeAngle")
-            Log.e(TAG, "Angle of hips: $avgHipAngle")
+//            Log.e(TAG,"Angle of elbows: $avgElbowAngle" )
+//            Log.e(TAG, "Angle of knees: $avgKneeAngle")
+//            Log.e(TAG, "Angle of hips: $avgHipAngle")
 
             //Get textview's for labels
             var eyes_textview = fragmentSquatBinding.textEyesValue
-            var elbows_textview = fragmentSquatBinding.textElbowsValue
-
+            var timer_textview = fragmentSquatBinding.textTimerValue
+            val remaining_time = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                Duration.between(LocalTime.now(),timeRemaining).toSecondsPart()
+            } else {
+                //blah blah
+            }
             eyes_textview.setTextColor(Color.GREEN)
             //Print new values onto labels
             activity?.runOnUiThread {
@@ -237,11 +261,12 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                     eyes_textview.setTextColor(Color.GREEN)
                 }
                 else {
+                    fragmentSquatBinding.textFeedback.text = ""
                     eyes_textview.setTextColor(Color.RED)
                 }
 
                 eyes_textview.text = String.format("%.1f", avgKneeAngle)
-                elbows_textview.text = String.format("%.1f", avgHipAngle)
+                timer_textview.text = remaining_time.toString() + "s"
             }
         }catch (e: Exception) {
             Toast.makeText(
@@ -267,7 +292,8 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             shoulderDistance = getDistanceBetweenPoints(leftShoulder.position.x,rightShoulder.position.x,leftShoulder.position.y,rightShoulder.position.y)
             feetDistance = getDistanceBetweenPoints(leftAnkle.position.x,rightAnkle.position.x,leftAnkle.position.y,rightAnkle.position.y)
             if(feetDistance < shoulderDistance)
-                feedback.add("Feet should be shoulder-width or slightly further apart")
+                feedback.add("Wider Stance!")
+//                feedback.add("Feet should be shoulder-width or slightly further apart")
         }
         //Back should be between 90 - 40 degrees to the floor -> "Don't lean too far forward"
         //Get the back angle which is from the shoulder -> hip -> floor
@@ -277,7 +303,8 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             val backAngle =
                 getAngle(leftShoulder, leftHip, leftShoulder.position.x, leftHip.position.y)
             if(backAngle < 40)
-                feedback.add("Don't lean too far forward")
+                feedback.add("Lean Back!")
+//                feedback.add("Don't lean too far forward")
             else if(backAngle > 90)
                 feedback.add("Don't lean too far back")
         }
@@ -289,23 +316,33 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         if(leftKnee != null && rightKnee != null && feetDistance != 0f){
             kneeDistance = getDistanceBetweenPoints(leftKnee.position.x,rightKnee.position.x,leftKnee.position.y,rightKnee.position.y)
             if(kneeDistance < feetDistance)
-                feedback.add("Knees go forwards or out, don't bring them together")
+                feedback.add("Knees out!")
+//                feedback.add("Knees go forwards or out, don't bring them together")
         }
+        val feedbacktext = fragmentSquatBinding.textFeedback
+        if(feedback.size == 0) {
+            activity?.runOnUiThread {
+                feedbacktext.setTextColor(Color.GREEN)
+                feedbacktext.text = "Good Squat!"
+            }
+            return
+        }
+
         feedback.forEach{
             Log.e(TAG, it)
-            Toast.makeText(
-                activity?.baseContext,
-                "Feedback: $it",
-                Toast.LENGTH_SHORT).show()
         }
-        if(feedback.size == 0)
-            Toast.makeText(activity?.baseContext,"Good Squat!",Toast.LENGTH_SHORT).show()
+
+        val message = feedback.joinToString("\n")
+
+        activity?.runOnUiThread {
+            feedbacktext.setTextColor(Color.RED)
+            feedbacktext.text = message
+        }
+
     }
 
     private fun checkSquat(kneeAngle: Double): Boolean {
-        if (kneeAngle in 20.0..100.0)
-            return true
-        return false
+        return kneeAngle in 20.0..100.0
     }
     private fun getAngle(firstPoint: PoseLandmark, midPoint: PoseLandmark, lastPoint: PoseLandmark): Double {
         var result = Math.toDegrees(
@@ -360,6 +397,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             }.toTypedArray()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults:
         IntArray) {
@@ -377,6 +415,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onInitialized() {
         objectDetectorHelper.setupObjectDetector()
         // Initialize our background executor

@@ -70,4 +70,9 @@
             android:id="@+id/action_RegisterFragment_to_LoginFragment"
             app:destination="@id/LoginFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/postExerciseDashboard"
+        android:name="com.example.focal.PostExerciseDashboard"
+        android:label="fragment_post_exercise_dashboard"
+        tools:layout="@layout/fragment_post_exercise_dashboard" />
 </navigation>

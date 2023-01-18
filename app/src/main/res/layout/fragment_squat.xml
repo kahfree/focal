@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/text_elbows_value"
+            android:id="@+id/text_timer_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0"
@@ -23,7 +23,7 @@
             android:id="@+id/text_eyes_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Left Knee"
+            android:text="Knee Angle"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.1"
@@ -40,16 +40,16 @@
             android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.26"
+            app:layout_constraintHorizontal_bias="0.3"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.01" />
 
         <TextView
-            android:id="@+id/text_elbows_label"
+            android:id="@+id/text_timer_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Right Knee"
+            android:text="Time Remaining:"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.58"
@@ -86,8 +86,21 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.3"/>
+            app:layout_constraintVertical_bias="0.3" />
 
+        <TextView
+            android:id="@+id/text_feedback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="56dp"
+            android:text="Feedback:"
+            android:textSize="24sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.8" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
