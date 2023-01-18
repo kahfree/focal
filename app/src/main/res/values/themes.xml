@@ -1,0 +1,14 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Focal" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+<!--&lt;!&ndash;        <item name="android:actionBarItemBackground">@android:color/holo_purple</item>&ndash;&gt;-->
+<!--        <item name="actionBarStyle">@style/MyActionBarTheme</item>-->
+    </style>
+
+<!--    <style name="MyActionBarTheme" parent="@style/Theme.MaterialComponents.DayNight.DarkActionBar">-->
+<!--        <item name="android:background">@android:color/holo_purple</item>-->
+<!--    </style>-->
+    <style name="Theme.Focal" parent="Base.Theme.Focal" />
+</resources>

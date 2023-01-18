@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/LoginFragment">
+
+    <fragment
+        android:id="@+id/HomeFragment"
+        android:name="com.example.focal.FirstFragment"
+        android:label="@string/home_fragment_label"
+        tools:layout="@layout/fragment_first">
+
+        <action
+            android:id="@+id/action_HomeFragment_to_GoalFragment"
+            app:destination="@id/GoalFragment" />
+        <action
+            android:id="@+id/action_HomeFragment_to_ProfileFragment"
+            app:destination="@id/ProfileFragment" />
+        <action
+            android:id="@+id/action_HomeFragment_to_SquatFragment"
+            app:destination="@id/SquatFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/GoalFragment"
+        android:name="com.example.focal.GoalFragment"
+        android:label="@string/goal_fragment_label"
+        tools:layout="@layout/fragment_goal">
+
+        <action
+            android:id="@+id/action_GoalFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/ProfileFragment"
+        android:name="com.example.focal.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" >
+        <action
+            android:id="@+id/action_ProfileFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/SquatFragment"
+        android:name="com.example.focal.SquatFragment"
+        android:label="Squat Detection"
+        tools:layout="@layout/fragment_squat" >
+        <action
+            android:id="@+id/action_SquatFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/LoginFragment"
+        android:name="com.example.focal.ui.login.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_LoginFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
+        <action
+            android:id="@+id/action_LoginFragment_to_RegisterFragment"
+            app:destination="@id/RegisterFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/RegisterFragment"
+        android:name="com.example.focal.RegisterFragment"
+        android:label="Register"
+        tools:layout="@layout/fragment_register" >
+        <action
+            android:id="@+id/action_RegisterFragment_to_LoginFragment"
+            app:destination="@id/LoginFragment" />
+    </fragment>
+</navigation>
