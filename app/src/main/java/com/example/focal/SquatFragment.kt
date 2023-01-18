@@ -269,8 +269,18 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             if(feetDistance < shoulderDistance)
                 feedback.add("Feet should be shoulder-width or slightly further apart")
         }
-        //Keep elbows at or behind your back when barbell squatting -> "Bring elbows to at or behind your back"
-        //Not to sure if this is necessary nor how to implement it
+        //Back should be between 90 - 40 degrees to the floor -> "Don't lean too far forward"
+        //Get the back angle which is from the shoulder -> hip -> floor
+        //Have to generate the floor angle myself, taking the x of the shoulder and the y of the hip
+        val leftHip = pose.getPoseLandmark(PoseLandmark.LEFT_HIP)
+        if(leftShoulder != null && leftHip != null) {
+            val backAngle =
+                getAngle(leftShoulder, leftHip, leftShoulder.position.x, leftHip.position.y)
+            if(backAngle < 40)
+                feedback.add("Don't lean too far forward")
+            else if(backAngle > 90)
+                feedback.add("Don't lean too far back")
+        }
 
         //Knees should be the same or greater distance apart than the feet -> "Knees go forwards or out, never in"
         val leftKnee = pose.getPoseLandmark(PoseLandmark.LEFT_KNEE)
@@ -301,6 +311,20 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         var result = Math.toDegrees(
             (atan2(lastPoint.position.y - midPoint.position.y,
                 lastPoint.position.x - midPoint.position.x)
+                    - atan2(firstPoint.position.y - midPoint.position.y,
+                firstPoint.position.x - midPoint.position.x)).toDouble()
+        )
+        result = Math.abs(result) // Angle should never be negative
+        if (result > 180) {
+            result = 360.0 - result // Always get the acute representation of the angle
+        }
+        return result
+    }
+
+    private fun getAngle(firstPoint: PoseLandmark, midPoint: PoseLandmark, lastX : Float, lastY : Float): Double {
+        var result = Math.toDegrees(
+            (atan2(lastY - midPoint.position.y,
+                lastX - midPoint.position.x)
                     - atan2(firstPoint.position.y - midPoint.position.y,
                 firstPoint.position.x - midPoint.position.x)).toDouble()
         )
