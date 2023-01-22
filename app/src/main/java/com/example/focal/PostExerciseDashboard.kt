@@ -5,6 +5,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.focal.databinding.FragmentPostExerciseDashboardBinding
+import com.example.focal.databinding.FragmentSquatBinding
+import java.time.LocalTime
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -17,26 +20,36 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class PostExerciseDashboard : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private var TAG = "PostExerciseDashboardFragment"
+    private var _fragmentDashboardBinding: FragmentPostExerciseDashboardBinding? = null
+    private val fragmentDashboardBinding
+        get() = _fragmentDashboardBinding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_post_exercise_dashboard, container, false)
+        _fragmentDashboardBinding = FragmentPostExerciseDashboardBinding.inflate(inflater, container, false)
+        return fragmentDashboardBinding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        var feedbackString = requireArguments().getStringArray("feedbackList")?.joinToString("\n")
+        activity?.runOnUiThread {
+            fragmentDashboardBinding.textViewMaxDepth.text =
+                requireArguments().getFloat("squatDepth").toString()
+            fragmentDashboardBinding.textViewSquatQuality.text =
+                requireArguments().getFloat("squatQuality").toString()
+            fragmentDashboardBinding.textViewFeedback.text =
+                feedbackString
+        }
+    }
     companion object {
         /**
          * Use this factory method to create a new instance of

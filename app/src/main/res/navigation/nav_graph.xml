@@ -48,6 +48,9 @@
         <action
             android:id="@+id/action_SquatFragment_to_HomeFragment"
             app:destination="@id/HomeFragment" />
+        <action
+            android:id="@+id/action_SquatFragment_to_postExerciseDashboard"
+            app:destination="@id/postExerciseDashboard" />
     </fragment>
     <fragment
         android:id="@+id/LoginFragment"
@@ -74,5 +77,20 @@
         android:id="@+id/postExerciseDashboard"
         android:name="com.example.focal.PostExerciseDashboard"
         android:label="fragment_post_exercise_dashboard"
-        tools:layout="@layout/fragment_post_exercise_dashboard" />
+        tools:layout="@layout/fragment_post_exercise_dashboard" >
+        <action
+            android:id="@+id/action_postExerciseDashboard_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
+        <argument
+            android:name="squatDepth"
+            app:argType="float"
+            android:defaultValue="0" />
+        <argument
+            android:name="feedbackList"
+            app:argType="string[]" />
+        <argument
+            android:name="squatQuality"
+            app:argType="float"
+            android:defaultValue="0" />
+    </fragment>
 </navigation>

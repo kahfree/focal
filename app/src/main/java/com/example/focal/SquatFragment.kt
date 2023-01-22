@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -65,8 +66,9 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     private var cameraProvider: ProcessCameraProvider? = null
     private var graphicOverlay : GraphicOverlay? = null
     private var timeRemaining : LocalTime? = null
-
-
+    private var maxDepth : Float = 361f
+    private var goodSquat : Float = 0f
+    private var badSquat : Float = 0f
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -85,6 +87,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             objectDetectorListener = this)
         graphicOverlay = fragmentSquatBinding.graphicOverlay
         timeRemaining = LocalTime.now().plusSeconds(20)
+        fragmentSquatBinding.buttonDashboard.visibility = View.INVISIBLE
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -119,58 +122,39 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
         analysisUseCase?.setAnalyzer(
             cameraExecutor,
+
             ImageAnalysis.Analyzer { image: ImageProxy ->
                 try {
+                    // If the time is up display the post-exercise dashboard
                     if(LocalTime.now().isAfter(timeRemaining)) {
                         postExerciseDashboard()
                     }
+                    else {
+                        // Convert the image from a CameraX 'ImageProxy' to an Google 'InputImage'
+                        val imageToUse = InputImage.fromMediaImage(
+                            image.image!!,
+                            image.imageInfo.rotationDegrees
+                        )
 
-                    val imageToUse = InputImage.fromMediaImage(image.image!!, image.imageInfo.rotationDegrees)
-                    poseDetector.process(imageToUse).continueWith { task ->
-                        val pose = task.getResult()
-                        processPose(pose!!)
-
-                    }.addOnCompleteListener{ image.close()}
+                        // Run inference on the input image and analyze the frame for feedback
+                        poseDetector.process(imageToUse).continueWith { task ->
+                            val pose = task.getResult()
+                            processPose(pose!!)
+                        }.addOnCompleteListener {
+                            // Close the CameraX image so another can be inputted and prevent hanging
+                            image.close()
+                        }
+                    }
                 }catch (e: MlKitException){
                     Log.e(TAG,"Failed to process image. Error: " + e.localizedMessage)
                 }
+
             }
         )
-/*
-        imageAnalyzer = ImageAnalysis.Builder()
-            .setTargetAspectRatio(AspectRatio.RATIO_4_3)
-            .setTargetRotation(fragmentSquatBinding.viewFinder.display.rotation)
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .setOutputImageFormat(OUTPUT_IMAGE_FORMAT_YUV_420_888)
-            .build()
-            .also {
-                it.setAnalyzer(cameraExecutor){ image ->
-                    if (!::bitmapBuffer.isInitialized){
-                        bitmapBuffer = Bitmap.createBitmap(
-                            image.width,
-                            image.height,
-                            Bitmap.Config.ARGB_8888
-                        )
-                    }
-//                    detectObjects(image)
-                    val inputImage = image.image?.let { it1 -> InputImage.fromMediaImage(it1,image.imageInfo.rotationDegrees) }
-                    if (inputImage != null) {
-                        poseDetector.process(inputImage).addOnSuccessListener {
-                            Log.e(TAG,"Success")
-                            processPose(it,bitmapBuffer)
-                        }.addOnFailureListener{
-                            Log.e(TAG,"Failure: ${it.message}")
-                        }
-                    }
-                    image.close()
-                }
-            }
-*/
         cameraProvider.unbindAll()
 
         try {
             camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, analysisUseCase)
-
             preview?.setSurfaceProvider(fragmentSquatBinding.viewFinder.surfaceProvider)
         } catch (exc: Exception) {
             Log.e(TAG, "Use case binding failed", exc)
@@ -178,10 +162,21 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     }
 
     private fun postExerciseDashboard(){
-        val mainThreadHandler : Handler = HandlerCompat.createAsync(Looper.getMainLooper())
-        mainThreadHandler.post{
-            findNavController().navigate(R.id.action_SquatFragment_to_HomeFragment)
+//        val mainThreadHandler : Handler = HandlerCompat.createAsync(Looper.getMainLooper())
+//        mainThreadHandler.post{
+//            findNavController().navigate(R.id.action_SquatFragment_to_postExerciseDashboard)
+//      }
+        activity?.runOnUiThread { fragmentSquatBinding.buttonDashboard.visibility = View.VISIBLE }
+
+        fragmentSquatBinding.buttonDashboard.setOnClickListener {
+            findNavController().navigate(R.id.action_SquatFragment_to_postExerciseDashboard, Bundle().apply {
+                putFloat("squatDepth", maxDepth)
+                putStringArray("feedbackList", arrayOf("Yes now", "Gamers", "Yeehaw"))
+                val quality = goodSquat / (goodSquat + badSquat) * 100
+                putFloat("squatQuality", quality)
+            })
         }
+
     }
     private fun detectObjects(image: ImageProxy) {
         image.use { bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
@@ -255,6 +250,8 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             }
             eyes_textview.setTextColor(Color.GREEN)
             //Print new values onto labels
+            if(avgKneeAngle < maxDepth)
+                maxDepth = avgKneeAngle.toFloat()
             activity?.runOnUiThread {
                 if(checkSquat(avgKneeAngle)) {
                     checkForm(pose)
@@ -287,7 +284,8 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         val rightShoulder = pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER)
         var shoulderDistance = 0f
         var feetDistance = 0f
-        //If the distance between ankles is the same or greater than the shoulder distance its all good
+
+        //The stance should be the same width or wider than the shoulders
         if(leftAnkle != null && rightAnkle != null && leftShoulder != null && rightShoulder != null) {
             shoulderDistance = getDistanceBetweenPoints(leftShoulder.position.x,rightShoulder.position.x,leftShoulder.position.y,rightShoulder.position.y)
             feetDistance = getDistanceBetweenPoints(leftAnkle.position.x,rightAnkle.position.x,leftAnkle.position.y,rightAnkle.position.y)
@@ -295,6 +293,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                 feedback.add("Wider Stance!")
 //                feedback.add("Feet should be shoulder-width or slightly further apart")
         }
+
         //Back should be between 90 - 40 degrees to the floor -> "Don't lean too far forward"
         //Get the back angle which is from the shoulder -> hip -> floor
         //Have to generate the floor angle myself, taking the x of the shoulder and the y of the hip
@@ -321,6 +320,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         }
         val feedbacktext = fragmentSquatBinding.textFeedback
         if(feedback.size == 0) {
+            goodSquat++
             activity?.runOnUiThread {
                 feedbacktext.setTextColor(Color.GREEN)
                 feedbacktext.text = "Good Squat!"
@@ -328,6 +328,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             return
         }
 
+        badSquat++
         feedback.forEach{
             Log.e(TAG, it)
         }
@@ -344,6 +345,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     private fun checkSquat(kneeAngle: Double): Boolean {
         return kneeAngle in 20.0..100.0
     }
+
     private fun getAngle(firstPoint: PoseLandmark, midPoint: PoseLandmark, lastPoint: PoseLandmark): Double {
         var result = Math.toDegrees(
             (atan2(lastPoint.position.y - midPoint.position.y,
