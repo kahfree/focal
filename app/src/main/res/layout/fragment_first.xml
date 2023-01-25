@@ -37,4 +37,15 @@
             app:layout_constraintStart_toEndOf="@+id/button_home"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <Button
+            android:id="@+id/button_shoulder_press"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Shoulder Press"
+            app:layout_constraintBottom_toTopOf="@+id/button_home"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.459" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -41,13 +41,15 @@ class PostExerciseDashboard : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         var feedbackString = requireArguments().getStringArray("feedbackList")?.joinToString("\n")
+        var feedbackToGive = requireArguments().getSerializable("feedbackToGive") as HashMap<String, String>
+
         activity?.runOnUiThread {
             fragmentDashboardBinding.textViewMaxDepth.text =
-                requireArguments().getFloat("squatDepth").toString()
-            fragmentDashboardBinding.textViewSquatQuality.text =
-                requireArguments().getFloat("squatQuality").toString()
+                requireArguments().getFloat("maxDepth").toString()
+            fragmentDashboardBinding.textViewExerciseQuality.text =
+                requireArguments().getFloat("exerciseQuality").toString()
             fragmentDashboardBinding.textViewFeedback.text =
-                feedbackString
+                feedbackToGive.entries.joinToString("\n")
         }
     }
     companion object {

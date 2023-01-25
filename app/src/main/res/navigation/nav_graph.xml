@@ -20,6 +20,9 @@
         <action
             android:id="@+id/action_HomeFragment_to_SquatFragment"
             app:destination="@id/SquatFragment" />
+        <action
+            android:id="@+id/action_HomeFragment_to_shoulderPressFragment"
+            app:destination="@id/shoulderPressFragment" />
     </fragment>
     <fragment
         android:id="@+id/GoalFragment"
@@ -76,21 +79,33 @@
     <fragment
         android:id="@+id/postExerciseDashboard"
         android:name="com.example.focal.PostExerciseDashboard"
-        android:label="fragment_post_exercise_dashboard"
+        android:label="Post-Exercise Dashboard"
         tools:layout="@layout/fragment_post_exercise_dashboard" >
         <action
             android:id="@+id/action_postExerciseDashboard_to_HomeFragment"
             app:destination="@id/HomeFragment" />
         <argument
-            android:name="squatDepth"
+            android:name="maxDepth"
             app:argType="float"
             android:defaultValue="0" />
         <argument
             android:name="feedbackList"
             app:argType="string[]" />
         <argument
-            android:name="squatQuality"
+            android:name="exerciseQuality"
             app:argType="float"
             android:defaultValue="0" />
+        <argument
+            android:name="feedbackToGive"
+            app:argType="java.util.HashMap" />
+    </fragment>
+    <fragment
+        android:id="@+id/shoulderPressFragment"
+        android:name="com.example.focal.ShoulderPressFragment"
+        android:label="fragment_shoulder_press"
+        tools:layout="@layout/fragment_shoulder_press" >
+        <action
+            android:id="@+id/action_shoulderPressFragment_to_postExerciseDashboard"
+            app:destination="@id/postExerciseDashboard" />
     </fragment>
 </navigation>

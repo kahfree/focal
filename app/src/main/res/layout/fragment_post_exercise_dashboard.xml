@@ -10,7 +10,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/holo_purple">
+        android:background="@color/dashboardBackground">
 
         <TextView
             android:id="@+id/textView"
@@ -118,7 +118,7 @@
                 android:layout_height="match_parent">
 
                 <TextView
-                    android:id="@+id/textView_squat_quality"
+                    android:id="@+id/textView_exercise_quality"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
@@ -131,10 +131,10 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
-                android:id="@+id/text_squat_quality_heading"
+                android:id="@+id/text_exercise_quality_heading"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="Squat Quality:"
+                android:text="Exercise Quality:"
                 android:textSize="24sp" />
 
         </androidx.cardview.widget.CardView>

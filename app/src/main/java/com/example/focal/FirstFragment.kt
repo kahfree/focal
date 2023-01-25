@@ -1,10 +1,12 @@
 package com.example.focal
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.focal.databinding.FragmentFirstBinding
 
@@ -44,6 +46,9 @@ class FirstFragment : Fragment() {
 
         binding.buttonGoals.setOnClickListener{
             findNavController().navigate(R.id.action_HomeFragment_to_GoalFragment)
+        }
+        binding.buttonShoulderPress.setOnClickListener{
+            findNavController().navigate(R.id.action_HomeFragment_to_shoulderPressFragment)
         }
     }
 

@@ -21,6 +21,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.focal.databinding.FragmentLoginBinding
 
 import com.example.focal.R
+import io.realm.kotlin.log.LogLevel
 
 class LoginFragment : Fragment() {
 

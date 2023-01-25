@@ -1,5 +1,7 @@
 package com.example.focal.ui.login
 
+import android.nfc.Tag
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,6 +10,9 @@ import com.example.focal.data.LoginRepository
 import com.example.focal.data.Result
 
 import com.example.focal.R
+import com.example.focal.User
+import io.realm.kotlin.Realm
+import io.realm.kotlin.RealmConfiguration
 
 class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel() {
 
@@ -17,8 +22,10 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
     private val _loginResult = MutableLiveData<LoginResult>()
     val loginResult: LiveData<LoginResult> = _loginResult
 
-    fun login(username: String, password: String) {
+     fun login(username: String, password: String) {
         // can be launched in a separate asynchronous job
+         val config = RealmConfiguration.create(schema = setOf(User::class))
+         val realm: Realm = Realm.open(config)
         val result = loginRepository.login(username, password)
 
         if (result is Result.Success) {
@@ -27,6 +34,8 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
         } else {
             _loginResult.value = LoginResult(error = R.string.login_failed)
         }
+
+         realm.close()
     }
 
     fun loginDataChanged(username: String, password: String) {

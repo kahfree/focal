@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.HandlerCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.focal.databinding.FragmentShoulderPressBinding
 import com.example.focal.databinding.FragmentSquatBinding
 import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.common.InputImage
@@ -40,30 +41,26 @@ import java.nio.ByteBuffer
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
+import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
-typealias LumaListener = (luma: Double) -> Unit
+class ShoulderPressFragment : Fragment(){
 
-class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
+    private var TAG = "ShoulderPressFragment"
+    private var _fragmentShoulderPressBinding: FragmentShoulderPressBinding? = null
+    private val fragmentShoulderPressBinding
+        get() = _fragmentShoulderPressBinding!!
 
-    private var TAG = "SquatFragment"
-    private var _fragmentSquatBinding: FragmentSquatBinding? = null
-    private val fragmentSquatBinding
-        get() = _fragmentSquatBinding!!
-
-    private lateinit var objectDetectorHelper: ObjectDetectorHelper
     private lateinit var cameraExecutor: ExecutorService
-    private lateinit var bitmapBuffer: Bitmap
     private var preview: Preview? = null
-    private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
-    private var graphicOverlay : GraphicOverlay? = null
     private var timeRemaining : LocalTime? = null
     private var maxDepth : Float = 361f
     private var goodSquat : Float = 0f
     private var badSquat : Float = 0f
+    private var topOfMovementReached : Boolean = false
     private lateinit var squatFeedback : HashMap<String,String>
 
     override fun onCreateView(
@@ -71,20 +68,33 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _fragmentSquatBinding = FragmentSquatBinding.inflate(inflater, container, false)
-        return fragmentSquatBinding.root
+        _fragmentShoulderPressBinding = FragmentShoulderPressBinding.inflate(inflater, container, false)
+        return fragmentShoulderPressBinding.root
     }
 
     @SuppressLint("MissingPermission", "NewApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        objectDetectorHelper = ObjectDetectorHelper(
-            context = requireContext(),
-            objectDetectorListener = this)
-        graphicOverlay = fragmentSquatBinding.graphicOverlay
+        // Wait for the views to be properly laid out
+        fragmentShoulderPressBinding.viewFinder.post {
+            // Set up the camera and its use cases
+            if(allPermissionsGranted()){
+                setUpCamera()
+            } else {
+                activity?.let {
+                    ActivityCompat.requestPermissions(
+                        it,
+                        REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+                }
+            }
+        }
         timeRemaining = LocalTime.now().plusSeconds(20)
-        fragmentSquatBinding.buttonDashboard.visibility = View.INVISIBLE
+        fragmentShoulderPressBinding.buttonDashboard.visibility = View.INVISIBLE
         squatFeedback = HashMap<String, String>()
+        // Initialize our background executor
+        cameraExecutor = Executors.newSingleThreadExecutor()
+
+
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -109,7 +119,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
         preview = Preview.Builder()
             .setTargetAspectRatio(AspectRatio.RATIO_4_3)
-            .setTargetRotation(fragmentSquatBinding.viewFinder.display.rotation)
+            .setTargetRotation(fragmentShoulderPressBinding.viewFinder.display.rotation)
             .build()
 
         val poseOptions = PoseDetectorOptions.Builder().setDetectorMode(PoseDetectorOptions.STREAM_MODE).build()
@@ -152,24 +162,20 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
         try {
             camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, analysisUseCase)
-            preview?.setSurfaceProvider(fragmentSquatBinding.viewFinder.surfaceProvider)
+            preview?.setSurfaceProvider(fragmentShoulderPressBinding.viewFinder.surfaceProvider)
         } catch (exc: Exception) {
             Log.e(TAG, "Use case binding failed", exc)
         }
     }
 
     private fun postExerciseDashboard(){
-//        val mainThreadHandler : Handler = HandlerCompat.createAsync(Looper.getMainLooper())
-//        mainThreadHandler.post{
-//            findNavController().navigate(R.id.action_SquatFragment_to_postExerciseDashboard)
-//      }
         if(badSquat == 0f)
-            squatFeedback.put("Good Squat!", "No mistakes were made, keep up the good work!")
+            squatFeedback.put("Good Shoulder Press!", "No mistakes were made, keep up the good work!")
         val quality = goodSquat / (goodSquat + badSquat) * 100
-        activity?.runOnUiThread { fragmentSquatBinding.buttonDashboard.visibility = View.VISIBLE }
+        activity?.runOnUiThread { fragmentShoulderPressBinding.buttonDashboard.visibility = View.VISIBLE }
 
-        fragmentSquatBinding.buttonDashboard.setOnClickListener {
-            findNavController().navigate(R.id.action_SquatFragment_to_postExerciseDashboard, Bundle().apply {
+        fragmentShoulderPressBinding.buttonDashboard.setOnClickListener {
+            findNavController().navigate(R.id.action_shoulderPressFragment_to_postExerciseDashboard, Bundle().apply {
                 putFloat("maxDepth", maxDepth)
                 putStringArray("feedbackList", arrayOf("Yes now", "Gamers", "Yeehaw"))
                 putFloat("exerciseQuality", quality)
@@ -179,98 +185,47 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
     }
 
-    private fun detectObjects(image: ImageProxy) {
-        image.use { bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
-        val imageRotation = image.imageInfo.rotationDegrees
-        objectDetectorHelper.detect(bitmapBuffer, imageRotation)
-    }
-
+    @SuppressLint("NewApi")
     @RequiresApi(Build.VERSION_CODES.O)
     private fun processPose(pose: Pose, bitmap: Bitmap? = null){
         try{
-            val leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER)
-            val rightShoulder = pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER)
-
-            val leftElbow = pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW)
-            val rightElbow = pose.getPoseLandmark(PoseLandmark.RIGHT_ELBOW)
-
-            val leftWrist = pose.getPoseLandmark(PoseLandmark.LEFT_WRIST)
-            val rightWrist = pose.getPoseLandmark(PoseLandmark.RIGHT_WRIST)
 
             val leftHip = pose.getPoseLandmark(PoseLandmark.LEFT_HIP)
             val rightHip = pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
-
-
-            val leftKnee = pose.getPoseLandmark(PoseLandmark.LEFT_KNEE)
-            val rightKnee = pose.getPoseLandmark(PoseLandmark.RIGHT_KNEE)
-
-
-            val leftAnkle = pose.getPoseLandmark(PoseLandmark.LEFT_ANKLE)
-            val rightAnkle = pose.getPoseLandmark(PoseLandmark.RIGHT_ANKLE)
-
-            val leftEye = pose.getPoseLandmark(PoseLandmark.LEFT_EYE)
-            val rightEye = pose.getPoseLandmark(PoseLandmark.RIGHT_EYE)
-
-            // Get confidence levels
-            val lEyeConf = leftEye?.inFrameLikelihood
-            val rEyeConf = rightEye?.inFrameLikelihood
-            val lElbowConf = leftElbow?.inFrameLikelihood
-            val rElbowConf = rightElbow?.inFrameLikelihood
-
-
-//            Log.e(TAG,"**CONFIDENCE LEVELS OF LANDMARKS**\nEyes: $lEyeConf $rEyeConf\nElbows: $lElbowConf $rElbowConf")
-
-            val graphicOverlay = graphicOverlay!!
-            graphicOverlay.clear()
+            val leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER)
+            val rightShoulder = pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER)
+            val leftElbow = pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW)
+            val rightElbow = pose.getPoseLandmark(PoseLandmark.RIGHT_ELBOW)
 
             //Get angles of each joint
-            val leftElbowAngle = getAngle(leftWrist!!,leftElbow!!,leftShoulder!!)
-            val rightElbowAngle = getAngle(rightWrist!!,rightElbow!!, rightShoulder!!)
-            val leftKneeAngle = getAngle(leftAnkle!!, leftKnee!!, leftHip!!)
-            val rightKneeAngle = getAngle(rightAnkle!!, rightKnee!!, rightHip!!)
-            val leftHipAngle = getAngle(leftKnee!!,leftHip!!,leftShoulder!!)
-            val rightHipAngle = getAngle(rightKnee!!,rightHip!!,rightShoulder!!)
+            val leftArmpitAngle = getAngle(leftElbow!!, leftShoulder!!, leftHip!!)
+            val rightArmpitAngle = getAngle(rightElbow!!, rightShoulder!!, rightHip!!)
 
             //Get average values between both joints
-            val avgElbowAngle = (leftElbowAngle + rightElbowAngle) / 2
-            val avgKneeAngle = (leftKneeAngle + rightKneeAngle) / 2
-            val avgHipAngle = (leftHipAngle + rightHipAngle) / 2
+            val avgArmpitAngle = (leftArmpitAngle + rightArmpitAngle) / 2
 
-            //Log average values to console
-//            Log.e(TAG,"Angle of elbows: $avgElbowAngle" )
-//            Log.e(TAG, "Angle of knees: $avgKneeAngle")
-//            Log.e(TAG, "Angle of hips: $avgHipAngle")
+            var eyes_textview = fragmentShoulderPressBinding.textArmpitAngleValue
+            var timer_textview = fragmentShoulderPressBinding.textTimerValue
+            val remainingTime = Duration.between(LocalTime.now(),timeRemaining).toSecondsPart()
 
-            //Get textview's for labels
-            var eyes_textview = fragmentSquatBinding.textEyesValue
-            var timer_textview = fragmentSquatBinding.textTimerValue
-            val remaining_time = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                Duration.between(LocalTime.now(),timeRemaining).toSecondsPart()
-            } else {
-                //blah blah
-            }
             eyes_textview.setTextColor(Color.GREEN)
             //Print new values onto labels
-            if(avgKneeAngle < maxDepth)
-                maxDepth = avgKneeAngle.toFloat()
+            if(topOfMovementReached && avgArmpitAngle < maxDepth)
+                maxDepth = avgArmpitAngle.toFloat()
             activity?.runOnUiThread {
-                if(checkSquat(avgKneeAngle)) {
+                if(checkShoulderPress(avgArmpitAngle)) {
                     checkForm(pose)
                     eyes_textview.setTextColor(Color.GREEN)
                 }
                 else {
-                    fragmentSquatBinding.textFeedback.text = ""
+                    fragmentShoulderPressBinding.textFeedback.text = ""
                     eyes_textview.setTextColor(Color.RED)
                 }
 
-                eyes_textview.text = String.format("%.1f", avgKneeAngle)
-                timer_textview.text = remaining_time.toString() + "s"
+                eyes_textview.text = String.format("%.1f", avgArmpitAngle)
+                timer_textview.text = remainingTime.toString() + "s"
             }
         }catch (e: Exception) {
-            Toast.makeText(
-                activity?.baseContext,
-                "Pose Landmarks failed.",
-                Toast.LENGTH_SHORT).show()
             Log.d(TAG, e.localizedMessage)
         }
     }
@@ -279,65 +234,66 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         val feedback : MutableList<String> = mutableListOf()
         //Check if feet are shoulder-width apart -> "Feet should be shoulder-width or slightly further apart"
         //Get the landmarks needed
-        val leftAnkle = pose.getPoseLandmark(PoseLandmark.LEFT_ANKLE)
-        val rightAnkle = pose.getPoseLandmark(PoseLandmark.RIGHT_ANKLE)
+        val leftElbow = pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW)
+        val rightElbow = pose.getPoseLandmark(PoseLandmark.RIGHT_ELBOW)
         val leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER)
         val rightShoulder = pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER)
+        val leftWrist = pose.getPoseLandmark(PoseLandmark.LEFT_WRIST)
+        val rightWrist = pose.getPoseLandmark(PoseLandmark.RIGHT_WRIST)
+        val leftHip = pose.getPoseLandmark(PoseLandmark.LEFT_HIP)
+        val rightHip = pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
         var shoulderDistance = 0f
-        var feetDistance = 0f
+        var elbowDistance = 0f
+        var wristDistance = 0f
 
         //The stance should be the same width or wider than the shoulders
-        if(leftAnkle != null && rightAnkle != null && leftShoulder != null && rightShoulder != null) {
+        if(leftElbow != null && rightElbow != null && leftShoulder != null && rightShoulder != null && leftWrist != null && rightWrist != null) {
             shoulderDistance = getDistanceBetweenPoints(leftShoulder.position.x,rightShoulder.position.x,leftShoulder.position.y,rightShoulder.position.y)
-            feetDistance = getDistanceBetweenPoints(leftAnkle.position.x,rightAnkle.position.x,leftAnkle.position.y,rightAnkle.position.y)
-            if(feetDistance <= shoulderDistance) {
-                feedback.add("Wider Stance!")
+            elbowDistance = getDistanceBetweenPoints(leftElbow.position.x,rightElbow.position.x,leftElbow.position.y,rightElbow.position.y)
+            wristDistance = getDistanceBetweenPoints(leftWrist.position.x,rightWrist.position.x,leftWrist.position.y,rightWrist.position.y)
+            if(elbowDistance <= shoulderDistance) {
+                feedback.add("Elbows Out!")
                 squatFeedback.put(
-                    "Wider Stance!",
-                    "Feet should be shoulder-width or slightly further apart"
+                    "Elbows Out!",
+                    "Elbows should be same width or wider than shoulders"
                 )
+            }
+            if(wristDistance <= shoulderDistance){
+                feedback.add("Wider Hands!")
+                squatFeedback.put(
+                    "Wider Hands!",
+                    "Hands should be same width or wider than shoulders"
+                )
+            }
+
+
+            val leftArmpitAngle = getAngle(leftElbow!!, leftShoulder!!, leftHip!!)
+            val rightArmpitAngle = getAngle(rightElbow!!, rightShoulder!!, rightHip!!)
+
+            //Get average values between both joints
+            val avgArmpitAngle = (leftArmpitAngle + rightArmpitAngle) / 2
+            //This works, but only if the left arm is above the right
+            //Could workaround by doing another check in statement, but there must be a maths flaw here...
+            //Added the OR clause for the meantime, still doesn't feel right
+            if((abs(leftWrist.position.y) - abs(rightWrist.position.y)) >= 50 || (abs(rightWrist.position.y) - abs(leftWrist.position.y)) >= 50){
+                feedback.add("Both Arms!")
+                squatFeedback.put(
+                    "Both Arms!",
+                    "Both arms should be pressed at the same time"
+                )
+            }
+            else if(avgArmpitAngle >= 130.0){
+                topOfMovementReached = true
             }
         }
 
-        //Back should be between 90 - 40 degrees to the floor -> "Don't lean too far forward"
-        //Get the back angle which is from the shoulder -> hip -> floor
-        //Have to generate the floor angle myself, taking the x of the shoulder and the y of the hip
-        val leftHip = pose.getPoseLandmark(PoseLandmark.LEFT_HIP)
-        if(leftShoulder != null && leftHip != null) {
-            val backAngle =
-                getAngle(leftShoulder, leftHip, leftShoulder.position.x, leftHip.position.y)
-            if(backAngle <= 40) {
-                feedback.add("Lean Back!")
-                squatFeedback.put(
-                    "Lean back!",
-                    "To prevent back injury, keep your back between 90 and 40 degrees to the floor"
-                )
-            }
-//                feedback.add("Don't lean too far forward")
-            else if(backAngle > 90)
-                feedback.add("Don't lean too far back")
-        }
 
-        //Knees should be the same or greater distance apart than the feet -> "Knees go forwards or out, never in"
-        val leftKnee = pose.getPoseLandmark(PoseLandmark.LEFT_KNEE)
-        val rightKnee = pose.getPoseLandmark(PoseLandmark.RIGHT_KNEE)
-        var kneeDistance = 0f
-        if(leftKnee != null && rightKnee != null && feetDistance != 0f){
-            kneeDistance = getDistanceBetweenPoints(leftKnee.position.x,rightKnee.position.x,leftKnee.position.y,rightKnee.position.y)
-            if(kneeDistance <= feetDistance) {
-                feedback.add("Knees out!")
-                squatFeedback.put(
-                    "Knees out!",
-                    "Knees go forwards or out, don't bring them together"
-                )
-            }
-        }
-        val feedbacktext = fragmentSquatBinding.textFeedback
+        val feedbacktext = fragmentShoulderPressBinding.textFeedback
         if(feedback.size == 0) {
             goodSquat++
             activity?.runOnUiThread {
                 feedbacktext.setTextColor(Color.GREEN)
-                feedbacktext.text = "Good Squat!"
+                feedbacktext.text = "Good Shoulder Press!"
             }
             return
         }
@@ -347,17 +303,15 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             Log.e(TAG, it)
         }
 
-        val message = feedback.joinToString("\n")
-
         activity?.runOnUiThread {
             feedbacktext.setTextColor(Color.RED)
-            feedbacktext.text = message
+            feedbacktext.text = feedback.joinToString("\n")
         }
 
     }
 
-    private fun checkSquat(kneeAngle: Double): Boolean {
-        return kneeAngle in 20.0..100.0
+    private fun checkShoulderPress(kneeAngle: Double): Boolean {
+        return kneeAngle in 45.0..180.0
     }
 
     private fun getAngle(firstPoint: PoseLandmark, midPoint: PoseLandmark, lastPoint: PoseLandmark): Double {
@@ -428,72 +382,6 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                     Toast.LENGTH_SHORT).show()
                 activity?.finish()
             }
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onInitialized() {
-        objectDetectorHelper.setupObjectDetector()
-        // Initialize our background executor
-        cameraExecutor = Executors.newSingleThreadExecutor()
-
-        // Wait for the views to be properly laid out
-        fragmentSquatBinding.viewFinder.post {
-            // Set up the camera and its use cases
-            if(allPermissionsGranted()){
-                setUpCamera()
-            } else {
-                activity?.let {
-                    ActivityCompat.requestPermissions(
-                        it,
-                        REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
-                }
-            }
-        }
-    }
-
-    override fun onError(error: String) {
-        activity?.runOnUiThread{
-            Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    override fun onResults(
-        results: MutableList<Detection>?,
-        inferenceTime: Long,
-        imageHeight: Int,
-        imageWidth: Int
-    ) {
-        activity?.runOnUiThread{
-                fragmentSquatBinding.overlay.setResults(
-                    results ?: LinkedList<Detection>(),
-                    imageHeight,
-                    imageWidth
-                )
-
-            fragmentSquatBinding.overlay.invalidate()
-        }
-    }
-
-    private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnalysis.Analyzer {
-
-        private fun ByteBuffer.toByteArray(): ByteArray {
-            rewind()    // Rewind the buffer to zero
-            val data = ByteArray(remaining())
-            get(data)   // Copy the buffer into a byte array
-            return data // Return the byte array
-        }
-
-        override fun analyze(image: ImageProxy) {
-
-            val buffer = image.planes[0].buffer
-            val data = buffer.toByteArray()
-            val pixels = data.map { it.toInt() and 0xFF }
-            val luma = pixels.average()
-
-            listener(luma)
-
-            image.close()
         }
     }
 }
