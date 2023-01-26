@@ -23,19 +23,19 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
     val loginResult: LiveData<LoginResult> = _loginResult
 
      fun login(username: String, password: String) {
-        // can be launched in a separate asynchronous job
-         val config = RealmConfiguration.create(schema = setOf(User::class))
-         val realm: Realm = Realm.open(config)
-        val result = loginRepository.login(username, password)
-
-        if (result is Result.Success) {
-            _loginResult.value =
-                LoginResult(success = LoggedInUserView(displayName = result.data.displayName))
-        } else {
-            _loginResult.value = LoginResult(error = R.string.login_failed)
-        }
-
-         realm.close()
+//        // can be launched in a separate asynchronous job
+//         val config = RealmConfiguration.create(schema = setOf(User::class))
+//         val realm: Realm = Realm.open(config)
+//        val result = loginRepository.login(username, password)
+//
+//        if (result is Result.Success) {
+//            _loginResult.value =
+//                LoginResult(success = LoggedInUserView(displayName = result.data.displayName))
+//        } else {
+//            _loginResult.value = LoginResult(error = R.string.login_failed)
+//        }
+//
+//         realm.close()
     }
 
     fun loginDataChanged(username: String, password: String) {

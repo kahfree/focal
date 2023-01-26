@@ -4,11 +4,12 @@ import io.realm.kotlin.types.ObjectId
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
-class User() : RealmObject {
-    @PrimaryKey
-    var _id: ObjectId = ObjectId.create()
-    var firstname: String = ""
-    var lastname: String = ""
-    var email : String = ""
-    var password : String = ""
+class User(
+    userID : String,
+    firstname : String,
+    lastname : String,
+    email: String,
+    password: String
+) {
+private var attemptHistory : List<Attempt>? = null
 }

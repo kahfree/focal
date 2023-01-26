@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +23,7 @@ import com.example.focal.databinding.FragmentLoginBinding
 
 import com.example.focal.R
 import io.realm.kotlin.log.LogLevel
+import java.io.File
 
 class LoginFragment : Fragment() {
 
@@ -115,6 +117,7 @@ class LoginFragment : Fragment() {
                 passwordEditText.text.toString()
             )
         }
+        readFile()
     }
 
     private fun updateUiWithUser(model: LoggedInUserView) {
@@ -133,5 +136,9 @@ class LoginFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    fun readFile(){
+        Log.e("Login Fragment",activity?.assets?.open("users.txt")?.readBytes().toString())
     }
 }
