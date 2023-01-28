@@ -1,5 +1,6 @@
 package com.example.focal.ui.login
 
+import android.content.Context
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.annotation.StringRes
@@ -12,18 +13,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
 import android.widget.Toast
-import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
 import com.example.focal.databinding.FragmentLoginBinding
 
+
 import com.example.focal.R
-import io.realm.kotlin.log.LogLevel
+import com.mongodb.MongoClient
+import com.mongodb.MongoException
+import org.bson.Document
 import java.io.File
+import java.io.FileOutputStream
+import java.io.PrintWriter
 
 class LoginFragment : Fragment() {
 
@@ -117,7 +119,50 @@ class LoginFragment : Fragment() {
                 passwordEditText.text.toString()
             )
         }
-        readFile()
+
+//        var mongoClient: MongoClient? = null
+//        try {
+//            mongoClient = MongoClient("127.0.0.1", 27017)
+//            Log.e("Login Fragment","Connection to the db!")
+//            val database = mongoClient.getDatabase("focal")
+//            Log.e("Login Fragment","Got the database")
+//            val collection = database.getCollection("focal")
+//            Log.e("Login Fragment","Got the collection")
+//            val documents = collection.listIndexes()
+//            Log.e("Login Fragment","Found some documents")
+//            Log.e("Login Fragment",documents.joinToString("\n"))
+//            mongoClient.close()
+//            Log.e("Login Fragment","Closed client connection")
+//        } catch (e: MongoException) {
+//            e.printStackTrace()
+//        } finally {
+//            mongoClient!!.close()
+//        }
+        val inputStream = activity?.assets?.open("users.txt")
+        val text = inputStream?.bufferedReader().use { it?.readLines() }
+        for(line in text!!){
+            Log.e("Login Fragment",line + " test")
+
+        }
+
+        val fileOutputStream = requireActivity().openFileOutput("attempts.txt", Context.MODE_PRIVATE)
+        val printWriter = PrintWriter(fileOutputStream)
+        printWriter.println("1,1,Squat,28-01-2023 12:30:00,40.34,73.56,Knees Out!-Wider Stance!")
+        printWriter.println("2,1,Squat,28-01-2023 12:34:00,36.26,77.32,Wider Stance!")
+        printWriter.flush()
+        printWriter.close()
+        fileOutputStream.close()
+        inputStream?.close()
+
+        val usersFileInput = requireActivity().openFileInput("users.txt")
+        val usersText = usersFileInput.bufferedReader().use { it.readText() }
+        Log.e("usersText",usersText)
+        val attemptsFileInput = requireActivity().openFileInput("attempts.txt")
+        val attemptsText = attemptsFileInput.bufferedReader().use { it.readText() }
+        Log.e("attemptsText",attemptsText)
+        val goalsFileInput = requireActivity().openFileInput("goals.txt")
+        val goalsText = goalsFileInput.bufferedReader().use { it.readText() }
+        Log.e("goalsText",goalsText)
     }
 
     private fun updateUiWithUser(model: LoggedInUserView) {
@@ -138,7 +183,4 @@ class LoginFragment : Fragment() {
         _binding = null
     }
 
-    fun readFile(){
-        Log.e("Login Fragment",activity?.assets?.open("users.txt")?.readBytes().toString())
-    }
 }

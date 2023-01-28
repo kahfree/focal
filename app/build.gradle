@@ -77,6 +77,9 @@ dependencies {
     implementation 'com.google.guava:guava:27.1-android'
     implementation "androidx.cardview:cardview:1.0.0"
 //    implementation 'org.mongodb:mongodb-driver-sync:4.7.2'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-native-mt'
-    implementation 'io.realm.kotlin:library-base:1.5.0'
+//    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-native-mt'
+//    implementation 'io.realm.kotlin:library-base:1.5.0'
+    implementation 'io.realm.kotlin:library-sync:1.4.0'
+    implementation("org.mongodb:mongo-java-driver:3.12.11")
+
 }
