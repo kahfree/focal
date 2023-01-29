@@ -11,14 +11,64 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/textView_goal1_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Goals will go here"
+            android:text="Goal #1 Title"
             android:textSize="24sp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView_goal1_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toTopOf="@+id/progressBar_1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_goal1_title" />
+
+        <TextView
+            android:id="@+id/textView_goal1_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="50.23\n/\n88.34"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="@+id/progressBar_1"
+            app:layout_constraintEnd_toEndOf="@+id/progressBar_1"
+            app:layout_constraintStart_toStartOf="@+id/progressBar_1"
+            app:layout_constraintTop_toTopOf="@+id/progressBar_1" />
+
+        <TextView
+            android:id="@+id/textView_goal1_deadline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="by 12-03-2022"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/progressBar_1" />
+
+        <ProgressBar
+            android:id="@+id/progressBar_1"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:indeterminateOnly="false"
+            android:progressDrawable="@drawable/circle"
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:indeterminate="false"
+            android:max="100"
+            android:progress="56"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.1" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

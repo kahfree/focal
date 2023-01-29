@@ -16,6 +16,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
+import com.example.focal.FileService
 import com.example.focal.databinding.FragmentLoginBinding
 
 
@@ -138,31 +139,37 @@ class LoginFragment : Fragment() {
 //        } finally {
 //            mongoClient!!.close()
 //        }
-        val inputStream = activity?.assets?.open("users.txt")
-        val text = inputStream?.bufferedReader().use { it?.readLines() }
-        for(line in text!!){
-            Log.e("Login Fragment",line + " test")
-
-        }
-
-        val fileOutputStream = requireActivity().openFileOutput("attempts.txt", Context.MODE_PRIVATE)
-        val printWriter = PrintWriter(fileOutputStream)
-        printWriter.println("1,1,Squat,28-01-2023 12:30:00,40.34,73.56,Knees Out!-Wider Stance!")
-        printWriter.println("2,1,Squat,28-01-2023 12:34:00,36.26,77.32,Wider Stance!")
-        printWriter.flush()
-        printWriter.close()
-        fileOutputStream.close()
-        inputStream?.close()
-
-        val usersFileInput = requireActivity().openFileInput("users.txt")
-        val usersText = usersFileInput.bufferedReader().use { it.readText() }
-        Log.e("usersText",usersText)
-        val attemptsFileInput = requireActivity().openFileInput("attempts.txt")
-        val attemptsText = attemptsFileInput.bufferedReader().use { it.readText() }
-        Log.e("attemptsText",attemptsText)
-        val goalsFileInput = requireActivity().openFileInput("goals.txt")
-        val goalsText = goalsFileInput.bufferedReader().use { it.readText() }
-        Log.e("goalsText",goalsText)
+//        val inputStream = activity?.assets?.open("users.txt")
+//        val text = inputStream?.bufferedReader().use { it?.readLines() }
+//        for(line in text!!){
+//            Log.e("Login Fragment",line + " test")
+//
+//        }
+//        inputStream?.close()
+//
+//        val fileOutputStream = requireActivity().openFileOutput("attempts.txt", Context.MODE_PRIVATE)
+//        val printWriter = PrintWriter(fileOutputStream)
+//        printWriter.println("1,1,Squat,28-01-2023 12:30:00,40.34,73.56,Knees Out!-Wider Stance!")
+//        printWriter.println("2,1,Squat,28-01-2023 12:34:00,36.26,77.32,Wider Stance!")
+//        printWriter.flush()
+//        printWriter.close()
+//        fileOutputStream.close()
+//
+//
+//        val usersFileInput = requireActivity().openFileInput("users.txt")
+//        val usersText = usersFileInput.bufferedReader().use { it.readText() }
+//        Log.e("usersText",usersText)
+//        val attemptsFileInput = requireActivity().openFileInput("attempts.txt")
+//        val attemptsText = attemptsFileInput.bufferedReader().use { it.readText() }
+//        Log.e("attemptsText",attemptsText)
+//        val goalsFileInput = requireActivity().openFileInput("goals.txt")
+//        val goalsText = goalsFileInput.bufferedReader().use { it.readText() }
+//        Log.e("goalsText",goalsText)
+//        usersFileInput.close()
+//        attemptsFileInput.close()
+//        goalsFileInput.close()
+        FileService(requireActivity()).resetGoals()
+        FileService(requireActivity()).logGoals()
     }
 
     private fun updateUiWithUser(model: LoggedInUserView) {

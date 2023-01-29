@@ -210,8 +210,10 @@ class ShoulderPressFragment : Fragment(){
 
             eyes_textview.setTextColor(Color.GREEN)
             //Print new values onto labels
-            if(topOfMovementReached && avgArmpitAngle < maxDepth)
+            if(topOfMovementReached && avgArmpitAngle < maxDepth) {
+                Log.e("Max Depth", "Recording new max depth from $maxDepth to $avgArmpitAngle")
                 maxDepth = avgArmpitAngle.toFloat()
+            }
             activity?.runOnUiThread {
                 if(checkShoulderPress(avgArmpitAngle)) {
                     checkForm(pose)

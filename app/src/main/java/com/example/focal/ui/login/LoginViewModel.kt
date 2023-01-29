@@ -36,6 +36,14 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
 //        }
 //
 //         realm.close()
+         val result = loginRepository.login(username, password)
+
+         if (result is Result.Success) {
+             _loginResult.value =
+                 LoginResult(success = LoggedInUserView(displayName = result.data.displayName))
+         } else {
+             _loginResult.value = LoginResult(error = R.string.login_failed)
+         }
     }
 
     fun loginDataChanged(username: String, password: String) {

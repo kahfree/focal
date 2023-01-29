@@ -1,12 +1,15 @@
 package com.example.focal
 
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import com.example.focal.databinding.FragmentPostExerciseDashboardBinding
 import com.example.focal.databinding.FragmentSquatBinding
+import java.time.LocalDate
 import java.time.LocalTime
 
 // TODO: Rename parameter arguments, choose names that match
@@ -37,6 +40,7 @@ class PostExerciseDashboard : Fragment() {
         return fragmentDashboardBinding.root
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -50,6 +54,16 @@ class PostExerciseDashboard : Fragment() {
                 requireArguments().getFloat("exerciseQuality").toString()
             fragmentDashboardBinding.textViewFeedback.text =
                 feedbackToGive.entries.joinToString("\n")
+        }
+
+        FileService(requireActivity()).logGoals()
+        val goalList = FileService(requireActivity()).readGoals()
+        if(goalList[0].current > requireArguments().getFloat("maxDepth")) {
+            FileService(requireActivity()).updateGoalProgress(requireArguments().getFloat("maxDepth"))
+            if(requireArguments().getFloat("maxDepth") <= goalList[0].goal)
+                FileService(requireActivity()).updateGoalStatus("Complete")
+            else if (LocalDate.now() >= LocalDate.parse(goalList[0].deadline))
+                FileService(requireActivity()).updateGoalStatus("Expired")
         }
     }
     companion object {
