@@ -1,6 +1,7 @@
 package com.example.focal.ui.login
 
 import android.content.Context
+import android.opengl.Visibility
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.annotation.StringRes
@@ -21,6 +22,7 @@ import com.example.focal.databinding.FragmentLoginBinding
 
 
 import com.example.focal.R
+import com.example.focal.User
 import com.mongodb.MongoClient
 import com.mongodb.MongoException
 import org.bson.Document
@@ -33,6 +35,7 @@ class LoginFragment : Fragment() {
     private lateinit var loginViewModel: LoginViewModel
     private var _binding: FragmentLoginBinding? = null
 
+    private lateinit var userToLogin: User
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
@@ -59,66 +62,17 @@ class LoginFragment : Fragment() {
         val loginButton = binding.login
         val loadingProgressBar = binding.loading
 
-        loginViewModel.loginFormState.observe(viewLifecycleOwner,
-            Observer { loginFormState ->
-                if (loginFormState == null) {
-                    return@Observer
-                }
-                loginButton.isEnabled = loginFormState.isDataValid
-                loginFormState.usernameError?.let {
-                    usernameEditText.error = getString(it)
-                }
-                loginFormState.passwordError?.let {
-                    passwordEditText.error = getString(it)
-                }
-            })
-
-        loginViewModel.loginResult.observe(viewLifecycleOwner,
-            Observer { loginResult ->
-                loginResult ?: return@Observer
-                loadingProgressBar.visibility = View.GONE
-                loginResult.error?.let {
-                    showLoginFailed(it)
-                }
-                loginResult.success?.let {
-                    updateUiWithUser(it)
-                }
-            })
-
-        val afterTextChangedListener = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
-                // ignore
-            }
-
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                // ignore
-            }
-
-            override fun afterTextChanged(s: Editable) {
-                loginViewModel.loginDataChanged(
-                    usernameEditText.text.toString(),
-                    passwordEditText.text.toString()
-                )
-            }
-        }
-        usernameEditText.addTextChangedListener(afterTextChangedListener)
-        passwordEditText.addTextChangedListener(afterTextChangedListener)
-        passwordEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                loginViewModel.login(
-                    usernameEditText.text.toString(),
-                    passwordEditText.text.toString()
-                )
-            }
-            false
-        }
-
         loginButton.setOnClickListener {
             loadingProgressBar.visibility = View.VISIBLE
-            loginViewModel.login(
-                usernameEditText.text.toString(),
-                passwordEditText.text.toString()
-            )
+            if(login())
+                updateUiWithUser(userToLogin)
+            else
+                showLoginFailed()
+
+        }
+
+        binding.buttonRegister.setOnClickListener {
+            findNavController().navigate(R.id.action_LoginFragment_to_RegisterFragment)
         }
 
 //        var mongoClient: MongoClient? = null
@@ -168,21 +122,34 @@ class LoginFragment : Fragment() {
 //        usersFileInput.close()
 //        attemptsFileInput.close()
 //        goalsFileInput.close()
-        FileService(requireActivity()).resetGoals()
+//        FileService(requireActivity()).resetGoals()
         FileService(requireActivity()).logGoals()
+        FileService(requireActivity()).logUsers()
+//        FileService(requireActivity()).resetUsers()
     }
 
-    private fun updateUiWithUser(model: LoggedInUserView) {
-        val welcome = getString(R.string.welcome) + model.displayName
-        // TODO : initiate successful logged in experience
+    private fun login(): Boolean{
+        val users = FileService(requireActivity()).getUsers()
+        for(user in users){
+            if(user.email == binding.username.text.toString() && user.password == binding.password.text.toString())
+            {
+                userToLogin = user
+                return true
+            }
+        }
+        return false
+    }
+    private fun updateUiWithUser(user: User) {
+        val welcome = "Welcome ${user.firstname}!"
         val appContext = context?.applicationContext ?: return
         Toast.makeText(appContext, welcome, Toast.LENGTH_LONG).show()
         findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment)
     }
 
-    private fun showLoginFailed(@StringRes errorString: Int) {
+    private fun showLoginFailed() {
+        binding.loading.visibility = View.INVISIBLE
         val appContext = context?.applicationContext ?: return
-        Toast.makeText(appContext, errorString, Toast.LENGTH_LONG).show()
+        Toast.makeText(appContext, "Login failed", Toast.LENGTH_LONG).show()
     }
 
     override fun onDestroyView() {

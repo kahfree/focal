@@ -49,9 +49,9 @@ class PostExerciseDashboard : Fragment() {
 
         activity?.runOnUiThread {
             fragmentDashboardBinding.textViewMaxDepth.text =
-                requireArguments().getFloat("maxDepth").toString()
+                String.format("%.2f", requireArguments().getFloat("maxDepth")) + "°"
             fragmentDashboardBinding.textViewExerciseQuality.text =
-                requireArguments().getFloat("exerciseQuality").toString()
+                String.format("%.2f", requireArguments().getFloat("exerciseQuality")) + "%"
             fragmentDashboardBinding.textViewFeedback.text =
                 feedbackToGive.entries.joinToString("\n")
         }

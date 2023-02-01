@@ -3,6 +3,9 @@ package com.example.focal
 import android.app.Activity
 import android.content.Context
 import android.util.Log
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
 import java.io.PrintWriter
 
 class FileService(
@@ -69,4 +72,53 @@ class FileService(
         fileOutputStream.close()
     }
 
+    fun getUsers(): List<User> {
+        var users = mutableListOf<User>()
+        val userFileInput = activity.openFileInput("users.txt")
+        val text = userFileInput.bufferedReader().use { it.readLines() }
+        for (line in text) {
+            var tmpList = line.split(",")
+            users.add(
+                User(
+                    tmpList[0].toInt(),
+                    tmpList[1],
+                    tmpList[2],
+                    tmpList[3],
+                    tmpList[4],
+                )
+            )
+        }
+        return users
+    }
+
+    fun addUser(user: User) {
+        val usersFileOutput = activity.openFileOutput("users.txt", Context.MODE_APPEND)
+        val newData = "$user\n"
+        usersFileOutput.write(newData.toByteArray())
+        usersFileOutput.close()
+    }
+
+    fun logUsers() {
+        val usersFileInput = activity.openFileInput("users.txt")
+        val usersText = usersFileInput.bufferedReader().use { it.readText() }
+        Log.e("File Service Users",usersText)
+    }
+
+//    1,John,Doe,johndoe@gmail.com,johndoe24
+//    2,Jane,Doe,janedoe@gmail.com,janedoe32
+//    3,Marty,Morrissey,mm58@gmail.com,martyparty
+    fun resetUsers(){
+        val fileOutputStream = activity.openFileOutput("users.txt", Context.MODE_PRIVATE)
+        val printWriter = PrintWriter(fileOutputStream)
+        printWriter.println("1,John,Doe,johndoe@gmail.com,johndoe24")
+        printWriter.println("2,Jane,Doe,janedoe@gmail.com,janedoe32")
+        printWriter.println("3,Marty,Morrissey,mm58@gmail.com,martyparty")
+        printWriter.flush()
+        printWriter.close()
+        fileOutputStream.close()
+    }
+
+    fun getNumRowsUsers(): Int {
+        return getUsers().size
+    }
 }

@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import android.util.Patterns
+import com.example.focal.FileService
 import com.example.focal.data.LoginRepository
 import com.example.focal.data.Result
 
@@ -37,7 +38,6 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
 //
 //         realm.close()
          val result = loginRepository.login(username, password)
-
          if (result is Result.Success) {
              _loginResult.value =
                  LoginResult(success = LoggedInUserView(displayName = result.data.displayName))

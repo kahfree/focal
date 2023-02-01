@@ -1,10 +1,15 @@
 package com.example.focal
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.navigation.fragment.findNavController
+import com.example.focal.databinding.FragmentRegisterBinding
+import com.example.focal.databinding.FragmentSquatBinding
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -17,24 +22,42 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class RegisterFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private var _fragmentRegisterBinding: FragmentRegisterBinding? = null
+    private val fragmentRegisterBinding
+        get() = _fragmentRegisterBinding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_register, container, false)
+        _fragmentRegisterBinding = FragmentRegisterBinding.inflate(inflater, container, false)
+        return fragmentRegisterBinding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        fragmentRegisterBinding.buttonRegister.setOnClickListener {
+            //Create user and add to system
+            Log.e("Register Fragment", "Pressed the fucking button!")
+            val newUser = User(
+                FileService(requireActivity()).getNumRowsUsers()+1,fragmentRegisterBinding.firstname.text.toString(),
+                fragmentRegisterBinding.lastname.text.toString(),
+                fragmentRegisterBinding.email.text.toString(),
+                fragmentRegisterBinding.password.text.toString())
+
+
+
+            FileService(requireActivity()).addUser(newUser)
+            //Navigate to login screen
+            Toast.makeText(requireContext(), "Registration was successful", Toast.LENGTH_SHORT)
+            findNavController().navigate(R.id.action_RegisterFragment_to_LoginFragment)
+
+//                Toast.makeText(requireContext(), "Failed to Register", Toast.LENGTH_SHORT)
+
+        }
+
     }
 
     companion object {
