@@ -130,7 +130,6 @@ class FileService(
         var attempts = mutableListOf<Attempt>()
         val userFileInput = activity.openFileInput("attempts.txt")
         val text = userFileInput.bufferedReader().use { it.readLines() }
-        val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
         for (line in text) {
             var tmpList = line.split(",")
             attempts.add(
@@ -138,7 +137,7 @@ class FileService(
                     tmpList[0].toInt(),
                     tmpList[1].toInt(),
                     tmpList[2],
-                    LocalDateTime.parse(tmpList[3], formatter),
+                    tmpList[3],
                     tmpList[4].toFloat(),
                     tmpList[5].toFloat(),
                     tmpList[6]
@@ -152,7 +151,6 @@ class FileService(
         var attempts = mutableListOf<Attempt>()
         val userFileInput = activity.openFileInput("attempts.txt")
         val text = userFileInput.bufferedReader().use { it.readLines() }
-        val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
         for (line in text) {
             var tmpList = line.split(",")
             if(tmpList[1].toInt() == userID) {
@@ -161,7 +159,7 @@ class FileService(
                         tmpList[0].toInt(),
                         tmpList[1].toInt(),
                         tmpList[2],
-                        LocalDateTime.parse(tmpList[3], formatter),
+                        tmpList[3],
                         tmpList[4].toFloat(),
                         tmpList[5].toFloat(),
                         tmpList[6]
@@ -177,7 +175,6 @@ class FileService(
         var attempts = mutableListOf<Attempt>()
         val userFileInput = activity.openFileInput("attempts.txt")
         val text = userFileInput.bufferedReader().use { it.readLines() }
-        val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
         for (line in text) {
             var tmpList = line.split(",")
             if(tmpList[1].toInt() == userID && tmpList[2] == exercise) {
@@ -186,7 +183,7 @@ class FileService(
                         tmpList[0].toInt(),
                         tmpList[1].toInt(),
                         tmpList[2],
-                        LocalDateTime.parse(tmpList[3], formatter),
+                        tmpList[3],
                         tmpList[4].toFloat(),
                         tmpList[5].toFloat(),
                         tmpList[6]

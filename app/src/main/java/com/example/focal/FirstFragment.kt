@@ -35,26 +35,23 @@ class FirstFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val userID = requireArguments().getInt("userID")
 
-        // Set button listeners
-        binding.buttonProfile.setOnClickListener{
-            findNavController().navigate(R.id.action_HomeFragment_to_ProfileFragment, Bundle().apply {
-                putInt("userID", userID)
-            })
-        }
-
-        binding.buttonHome.setOnClickListener {
+        binding.cardSquat.setOnClickListener {
             findNavController().navigate(R.id.action_HomeFragment_to_SquatFragment, Bundle().apply {
                 putInt("userID", userID)
             })
         }
-
-        binding.buttonGoals.setOnClickListener{
-            findNavController().navigate(R.id.action_HomeFragment_to_GoalFragment, Bundle().apply {
+        binding.cardShoulderPress.setOnClickListener {
+            findNavController().navigate(R.id.action_HomeFragment_to_shoulderPressFragment, Bundle().apply {
                 putInt("userID", userID)
             })
         }
-        binding.buttonShoulderPress.setOnClickListener{
-            findNavController().navigate(R.id.action_HomeFragment_to_shoulderPressFragment, Bundle().apply {
+        binding.cardProfile.setOnClickListener {
+            findNavController().navigate(R.id.action_HomeFragment_to_ProfileFragment, Bundle().apply {
+                putInt("userID", userID)
+            })
+        }
+        binding.cardGoals.setOnClickListener {
+            findNavController().navigate(R.id.action_HomeFragment_to_GoalFragment, Bundle().apply {
                 putInt("userID", userID)
             })
         }

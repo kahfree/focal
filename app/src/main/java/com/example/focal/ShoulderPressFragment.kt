@@ -95,6 +95,11 @@ class ShoulderPressFragment : Fragment(){
         // Initialize our background executor
         cameraExecutor = Executors.newSingleThreadExecutor()
         userID = requireArguments().getInt("userID")
+        maxDepth = 361f
+        goodSquat = 0f
+        badSquat = 0f
+        topOfMovementReached = false
+        squatFeedback = HashMap<String,String>()
 
 
     }

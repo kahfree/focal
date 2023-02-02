@@ -8,7 +8,7 @@ class Attempt(
     attemptID: Int,
     userID: Int,
     exercise: String,
-    datetime: LocalDateTime,
+    datetime: String,
     statOne: Float,
     statTwo: Float,
     feedback: String

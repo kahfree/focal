@@ -79,7 +79,7 @@ class PostExerciseDashboard : Fragment() {
         }
 
         val newAttempt = Attempt(FileService.getNumRowsAttempts()+1,userID,exercise!!,
-            LocalDateTime.parse(LocalDateTime.now().format(formatter),formatter),statOne.toFloat(),quality.toFloat(),attemptFeedback)
+            LocalDateTime.now().format(formatter),statOne.toFloat(),quality.toFloat(),attemptFeedback)
         FileService.addAttempt(newAttempt)
     }
     companion object {

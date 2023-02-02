@@ -87,6 +87,10 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         fragmentSquatBinding.buttonDashboard.visibility = View.INVISIBLE
         squatFeedback = HashMap<String, String>()
         userID = requireArguments().getInt("userID")
+        maxDepth = 361f
+        goodSquat = 0f
+        badSquat = 0f
+        squatFeedback = HashMap<String,String>()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
