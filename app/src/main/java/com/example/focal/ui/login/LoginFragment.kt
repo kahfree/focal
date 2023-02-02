@@ -122,9 +122,11 @@ class LoginFragment : Fragment() {
 //        usersFileInput.close()
 //        attemptsFileInput.close()
 //        goalsFileInput.close()
-//        FileService(requireActivity()).resetGoals()
+        FileService(requireActivity()).resetGoals()
         FileService(requireActivity()).logGoals()
         FileService(requireActivity()).logUsers()
+        FileService(requireActivity()).resetAttempts()
+        FileService(requireActivity()).logAttempts()
 //        FileService(requireActivity()).resetUsers()
     }
 
@@ -143,7 +145,9 @@ class LoginFragment : Fragment() {
         val welcome = "Welcome ${user.firstname}!"
         val appContext = context?.applicationContext ?: return
         Toast.makeText(appContext, welcome, Toast.LENGTH_LONG).show()
-        findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment)
+        findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment, Bundle().apply {
+            putInt("userID", user.userID)
+        })
     }
 
     private fun showLoginFailed() {

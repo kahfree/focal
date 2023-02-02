@@ -2,11 +2,30 @@ package com.example.focal
 
 import androidx.camera.core.ImageProxy
 import java.sql.Timestamp
+import java.time.LocalDateTime
 
 class Attempt(
-    timestamp: Timestamp,
+    attemptID: Int,
+    userID: Int,
     exercise: String,
-    feedback: String,
-    image: ImageProxy
-) : java.io.Serializable{
+    datetime: LocalDateTime,
+    statOne: Float,
+    statTwo: Float,
+    feedback: String
+){
+    val attemptID = attemptID
+    val userID = userID
+    val exercise = exercise
+    val datetime = datetime
+    val statOne = statOne
+    val statTwo = statTwo
+    val feedback = feedback
+    override fun toString(): String {
+        return "$attemptID,$userID,$exercise,$datetime,$statOne,$statTwo,$feedback"
+    }
+
+    fun display(): String{
+        return "$datetime\nDepth: $statOne Quality: $statTwo\nTips: $feedback"
+    }
+
 }

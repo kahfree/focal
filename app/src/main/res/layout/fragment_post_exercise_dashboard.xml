@@ -54,7 +54,8 @@
                         android:layout_marginTop="16dp"
                         android:text="Feedback goes here"
                         android:textAppearance="?attr/textAppearanceBody2"
-                        android:textColor="?android:attr/textColorSecondary" />
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="16sp" />
 
                 </LinearLayout>
 
@@ -230,7 +231,8 @@
                         android:layout_marginTop="16dp"
                         android:text="Previous attempts go here"
                         android:textAppearance="?attr/textAppearanceBody2"
-                        android:textColor="?android:attr/textColorSecondary" />
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="16sp" />
 
                 </LinearLayout>
 

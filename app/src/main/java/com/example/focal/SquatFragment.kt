@@ -65,6 +65,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     private var goodSquat : Float = 0f
     private var badSquat : Float = 0f
     private lateinit var squatFeedback : HashMap<String,String>
+    private var userID = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -85,6 +86,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         timeRemaining = LocalTime.now().plusSeconds(20)
         fragmentSquatBinding.buttonDashboard.visibility = View.INVISIBLE
         squatFeedback = HashMap<String, String>()
+        userID = requireArguments().getInt("userID")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -171,9 +173,10 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         fragmentSquatBinding.buttonDashboard.setOnClickListener {
             findNavController().navigate(R.id.action_SquatFragment_to_postExerciseDashboard, Bundle().apply {
                 putFloat("maxDepth", maxDepth)
-                putStringArray("feedbackList", arrayOf("Yes now", "Gamers", "Yeehaw"))
+                putString("exercise", "Squat")
                 putFloat("exerciseQuality", quality)
                 putSerializable("feedbackToGive",squatFeedback)
+                putInt("userID",userID)
             })
         }
 

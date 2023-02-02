@@ -33,22 +33,30 @@ class FirstFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        val userID = requireArguments().getInt("userID")
 
         // Set button listeners
         binding.buttonProfile.setOnClickListener{
-            findNavController().navigate(R.id.action_HomeFragment_to_ProfileFragment)
+            findNavController().navigate(R.id.action_HomeFragment_to_ProfileFragment, Bundle().apply {
+                putInt("userID", userID)
+            })
         }
 
         binding.buttonHome.setOnClickListener {
-            findNavController().navigate(R.id.action_HomeFragment_to_SquatFragment)
+            findNavController().navigate(R.id.action_HomeFragment_to_SquatFragment, Bundle().apply {
+                putInt("userID", userID)
+            })
         }
 
         binding.buttonGoals.setOnClickListener{
-            findNavController().navigate(R.id.action_HomeFragment_to_GoalFragment)
+            findNavController().navigate(R.id.action_HomeFragment_to_GoalFragment, Bundle().apply {
+                putInt("userID", userID)
+            })
         }
         binding.buttonShoulderPress.setOnClickListener{
-            findNavController().navigate(R.id.action_HomeFragment_to_shoulderPressFragment)
+            findNavController().navigate(R.id.action_HomeFragment_to_shoulderPressFragment, Bundle().apply {
+                putInt("userID", userID)
+            })
         }
     }
 

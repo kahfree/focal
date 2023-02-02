@@ -1,5 +1,6 @@
 package com.example.focal
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.util.Log
@@ -7,6 +8,8 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.PrintWriter
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class FileService(
     val activity: Activity
@@ -120,5 +123,122 @@ class FileService(
 
     fun getNumRowsUsers(): Int {
         return getUsers().size
+    }
+
+    @SuppressLint("NewApi")
+    fun getAttempts(): List<Attempt> {
+        var attempts = mutableListOf<Attempt>()
+        val userFileInput = activity.openFileInput("attempts.txt")
+        val text = userFileInput.bufferedReader().use { it.readLines() }
+        val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
+        for (line in text) {
+            var tmpList = line.split(",")
+            attempts.add(
+                Attempt(
+                    tmpList[0].toInt(),
+                    tmpList[1].toInt(),
+                    tmpList[2],
+                    LocalDateTime.parse(tmpList[3], formatter),
+                    tmpList[4].toFloat(),
+                    tmpList[5].toFloat(),
+                    tmpList[6]
+                )
+            )
+        }
+        return attempts
+    }
+    @SuppressLint("NewApi")
+    fun getAttemptsByUserID(userID: Int): List<Attempt> {
+        var attempts = mutableListOf<Attempt>()
+        val userFileInput = activity.openFileInput("attempts.txt")
+        val text = userFileInput.bufferedReader().use { it.readLines() }
+        val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
+        for (line in text) {
+            var tmpList = line.split(",")
+            if(tmpList[1].toInt() == userID) {
+                attempts.add(
+                    Attempt(
+                        tmpList[0].toInt(),
+                        tmpList[1].toInt(),
+                        tmpList[2],
+                        LocalDateTime.parse(tmpList[3], formatter),
+                        tmpList[4].toFloat(),
+                        tmpList[5].toFloat(),
+                        tmpList[6]
+                    )
+                )
+            }
+        }
+        return attempts
+    }
+
+    @SuppressLint("NewApi")
+    fun getAttemptsByUserIDAndExercise(userID: Int,exercise: String): List<Attempt> {
+        var attempts = mutableListOf<Attempt>()
+        val userFileInput = activity.openFileInput("attempts.txt")
+        val text = userFileInput.bufferedReader().use { it.readLines() }
+        val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
+        for (line in text) {
+            var tmpList = line.split(",")
+            if(tmpList[1].toInt() == userID && tmpList[2] == exercise) {
+                attempts.add(
+                    Attempt(
+                        tmpList[0].toInt(),
+                        tmpList[1].toInt(),
+                        tmpList[2],
+                        LocalDateTime.parse(tmpList[3], formatter),
+                        tmpList[4].toFloat(),
+                        tmpList[5].toFloat(),
+                        tmpList[6]
+                    )
+                )
+            }
+        }
+        return attempts
+    }
+
+    fun logAttempts() {
+        val attemptsFileInput = activity.openFileInput("attempts.txt")
+        val usersText = attemptsFileInput.bufferedReader().use { it.readText() }
+        Log.e("File Service Attempts",usersText)
+
+    }
+
+    fun resetAttempts(){
+        val fileOutputStream = activity.openFileOutput("attempts.txt", Context.MODE_PRIVATE)
+        val printWriter = PrintWriter(fileOutputStream)
+//        2023-02-02T10:33:11.422941
+//        02-02-2023 10:33:11
+//        28-01-2023 12:30:00
+//        2023-01-28T12:30:00.43
+        printWriter.println("1,1,Squat,28-01-2023 12:30:00,40.34,73.56,Knees Out!-Wider Stance!")
+        printWriter.println("2,1,Squat,28-01-2023 12:37:00,36.26,77.32,Wider Stance!")
+        printWriter.println("3,1,Shoulder Press,02-02-2023 10:33:11,60.69,92.6,Both Arms!")
+        printWriter.println("4,1,Shoulder Press,02-02-2023 10:56:46,50.55,93.38,Both Arms!")
+        printWriter.flush()
+        printWriter.close()
+        fileOutputStream.close()
+    }
+
+    fun addAttempt(attempt: Attempt) {
+        val attemptsFieOutput = activity.openFileOutput("attempts.txt", Context.MODE_APPEND)
+        val newData = "$attempt\n"
+        attemptsFieOutput.write(newData.toByteArray())
+        attemptsFieOutput.close()
+        Log.e("File Service","Added new attempt: $attempt")
+        logAttempts()
+    }
+
+    fun getNumRowsAttempts(): Int {
+        return getAttempts().size
+    }
+
+    fun getUserByID(userID: Int): User{
+        val users = getUsers()
+        for(user in users){
+            if(user.userID == userID)
+                return user
+        }
+        return User(0,"n/a","n/a","n/a","n/a")
     }
 }

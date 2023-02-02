@@ -62,6 +62,7 @@ class ShoulderPressFragment : Fragment(){
     private var badSquat : Float = 0f
     private var topOfMovementReached : Boolean = false
     private lateinit var squatFeedback : HashMap<String,String>
+    private var userID : Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -93,6 +94,7 @@ class ShoulderPressFragment : Fragment(){
         squatFeedback = HashMap<String, String>()
         // Initialize our background executor
         cameraExecutor = Executors.newSingleThreadExecutor()
+        userID = requireArguments().getInt("userID")
 
 
     }
@@ -177,9 +179,10 @@ class ShoulderPressFragment : Fragment(){
         fragmentShoulderPressBinding.buttonDashboard.setOnClickListener {
             findNavController().navigate(R.id.action_shoulderPressFragment_to_postExerciseDashboard, Bundle().apply {
                 putFloat("maxDepth", maxDepth)
-                putStringArray("feedbackList", arrayOf("Yes now", "Gamers", "Yeehaw"))
+                putString("exercise", "Shoulder Press")
                 putFloat("exerciseQuality", quality)
                 putSerializable("feedbackToGive",squatFeedback)
+                putInt("userID", userID)
             })
         }
 

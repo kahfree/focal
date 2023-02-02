@@ -23,6 +23,9 @@
         <action
             android:id="@+id/action_HomeFragment_to_shoulderPressFragment"
             app:destination="@id/shoulderPressFragment" />
+        <argument
+            android:name="userID"
+            app:argType="integer" />
     </fragment>
     <fragment
         android:id="@+id/GoalFragment"
@@ -33,6 +36,9 @@
         <action
             android:id="@+id/action_GoalFragment_to_HomeFragment"
             app:destination="@id/HomeFragment" />
+        <argument
+            android:name="userID"
+            app:argType="integer" />
     </fragment>
     <fragment
         android:id="@+id/ProfileFragment"
@@ -42,6 +48,9 @@
         <action
             android:id="@+id/action_ProfileFragment_to_HomeFragment"
             app:destination="@id/HomeFragment" />
+        <argument
+            android:name="userID"
+            app:argType="integer" />
     </fragment>
     <fragment
         android:id="@+id/SquatFragment"
@@ -54,6 +63,9 @@
         <action
             android:id="@+id/action_SquatFragment_to_postExerciseDashboard"
             app:destination="@id/postExerciseDashboard" />
+        <argument
+            android:name="userID"
+            app:argType="integer" />
     </fragment>
     <fragment
         android:id="@+id/LoginFragment"
@@ -89,15 +101,18 @@
             app:argType="float"
             android:defaultValue="0" />
         <argument
-            android:name="feedbackList"
-            app:argType="string[]" />
-        <argument
             android:name="exerciseQuality"
             app:argType="float"
             android:defaultValue="0" />
         <argument
             android:name="feedbackToGive"
             app:argType="java.util.HashMap" />
+        <argument
+            android:name="exercise"
+            app:argType="string" />
+        <argument
+            android:name="userID"
+            app:argType="integer" />
     </fragment>
     <fragment
         android:id="@+id/shoulderPressFragment"
@@ -107,5 +122,8 @@
         <action
             android:id="@+id/action_shoulderPressFragment_to_postExerciseDashboard"
             app:destination="@id/postExerciseDashboard" />
+        <argument
+            android:name="userID"
+            app:argType="integer" />
     </fragment>
 </navigation>
