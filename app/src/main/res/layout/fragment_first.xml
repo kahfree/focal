@@ -90,12 +90,53 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_bicep_curl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/card_shoulder_press">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                        <!-- Media -->
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="100dp"
+                            android:contentDescription="description of the media"
+                            android:scaleType="centerCrop"
+                            app:srcCompat="@drawable/circle" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                                <!-- Title, secondary and supporting text -->
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Bicep Curl"
+                                    android:textAppearance="?attr/textAppearanceTitleLarge" />
+                        </LinearLayout>
+
+
+                </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_profile"
             android:layout_width="190dp"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/card_shoulder_press">
+            app:layout_constraintTop_toBottomOf="@id/card_bicep_curl">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -135,7 +176,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/card_shoulder_press">
+            app:layout_constraintTop_toBottomOf="@+id/card_bicep_curl">
 
                 <LinearLayout
                     android:layout_width="match_parent"

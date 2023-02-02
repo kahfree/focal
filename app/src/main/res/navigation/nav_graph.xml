@@ -26,6 +26,9 @@
         <argument
             android:name="userID"
             app:argType="integer" />
+        <action
+            android:id="@+id/action_HomeFragment_to_bicepCurlFragment"
+            app:destination="@id/bicepCurlFragment" />
     </fragment>
     <fragment
         android:id="@+id/GoalFragment"
@@ -125,5 +128,14 @@
         <argument
             android:name="userID"
             app:argType="integer" />
+    </fragment>
+    <fragment
+        android:id="@+id/bicepCurlFragment"
+        android:name="com.example.focal.BicepCurlFragment"
+        android:label="fragment_bicep_curl2"
+        tools:layout="@layout/fragment_bicep_curl2" >
+        <action
+            android:id="@+id/action_bicepCurlFragment_to_postExerciseDashboard"
+            app:destination="@id/postExerciseDashboard" />
     </fragment>
 </navigation>

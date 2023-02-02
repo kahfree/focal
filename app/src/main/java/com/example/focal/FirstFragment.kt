@@ -45,6 +45,11 @@ class FirstFragment : Fragment() {
                 putInt("userID", userID)
             })
         }
+        binding.cardBicepCurl.setOnClickListener {
+            findNavController().navigate(R.id.action_HomeFragment_to_bicepCurlFragment, Bundle().apply {
+                putInt("userID", userID)
+            })
+        }
         binding.cardProfile.setOnClickListener {
             findNavController().navigate(R.id.action_HomeFragment_to_ProfileFragment, Bundle().apply {
                 putInt("userID", userID)

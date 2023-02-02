@@ -47,13 +47,13 @@ class GoalFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val goalList = FileService(requireActivity()).readGoals()
         FileService(requireActivity()).logGoals()
-        val pb = binding.progressBar1
+        val pb = binding.progressBarGoal
         pb.max = 100 - goalList[0].goal.toInt()
         pb.progress = 100 - goalList[0].current.toInt()
-        binding.textViewGoal1Body.text = goalList[0].current.toString() + "\n/\n" + goalList[0].goal.toString()
-        binding.textViewGoal1Title.text = goalList[0].title
-        binding.textViewGoal1Deadline.text = goalList[0].deadline
-        binding.textViewGoal1Status.text = goalList[0].status
+        binding.textViewGoalMetric2.text = goalList[0].current.toString() + " -> " + goalList[0].goal.toString()
+        binding.textViewGoalTitle.text = goalList[0].title
+        binding.textViewGoalDeadline2.text = goalList[0].deadline
+        binding.textViewGoalStatus.text = goalList[0].status
     }
 
     override fun onDestroyView() {
