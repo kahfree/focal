@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".GoalFragment">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_previous_attempts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:cardBackgroundColor="@color/white">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="8dp">
+            <!-- Title, secondary and supporting text -->
+            <TextView
+                android:id="@+id/textView_goal_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Goal #1 Title"
+                android:textAppearance="?attr/textAppearanceHeadline6"
+                android:textSize="24sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/textView_goal_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Status"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="18sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView_goal_title" />
+
+            <ProgressBar
+                android:id="@+id/progressBar_goal"
+                style="@style/Widget.AppCompat.ProgressBar"
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                android:indeterminate="false"
+                android:indeterminateOnly="false"
+                android:max="100"
+                android:progress="56"
+                android:progressDrawable="@drawable/circle"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/textView_goal_deadline2"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/textView_goal_percentage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="62%"
+                android:textAlignment="center"
+                android:textSize="34sp"
+                app:layout_constraintBottom_toBottomOf="@+id/progressBar_goal"
+                app:layout_constraintEnd_toEndOf="@+id/progressBar_goal"
+                app:layout_constraintStart_toStartOf="@+id/progressBar_goal"
+                app:layout_constraintTop_toTopOf="@+id/progressBar_goal" />
+
+
+            <TextView
+                android:id="@+id/textView_goal_metric2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="50.23 -> 88.34"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="24sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/progressBar_goal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView_goal_status"
+                app:layout_constraintVertical_bias="0.2" />
+
+            <TextView
+                android:id="@+id/textView_goal_deadline2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="By 12-03-2023"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="18sp"
+                app:layout_constraintStart_toEndOf="@+id/textView_goal_status"
+                app:layout_constraintTop_toBottomOf="@+id/textView_goal_title" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+    </RelativeLayout>
+
+</FrameLayout>

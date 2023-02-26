@@ -238,4 +238,37 @@ class FileService(
         }
         return User(0,"n/a","n/a","n/a","n/a")
     }
+
+    @SuppressLint("NewApi")
+    fun getGoals(): List<Goal> {
+        var goals = mutableListOf<Goal>()
+        val userFileInput = activity.openFileInput("goals.txt")
+        val text = userFileInput.bufferedReader().use { it.readLines() }
+        for (line in text) {
+            var tmpList = line.split(",")
+            goals.add(
+                Goal(
+                    tmpList[0].toInt(),
+                    tmpList[1].toInt(),
+                    tmpList[2],
+                    tmpList[3].toFloat(),
+                    tmpList[4].toFloat(),
+                    tmpList[5],
+                    tmpList[6],
+                    tmpList[7]
+                )
+            )
+        }
+        return goals
+    }
+
+    fun getGoalsByUserID(userID : Int) : List<Goal> {
+        var goals = getGoals()
+        var userGoals = mutableListOf<Goal>()
+        for(goal in goals){
+            if(goal.userID == userID)
+                userGoals.add(goal)
+        }
+        return userGoals
+    }
 }

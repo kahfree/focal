@@ -2,23 +2,21 @@ package com.example.focal
 
 import android.R
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import androidx.fragment.app.commit
-import com.example.focal.databinding.FragmentGoalBinding
+import com.example.focal.databinding.FragmentGoalTemplateBinding
 import com.example.focal.ui.login.LoginFragment
 
 
 /**
  * A simple [Fragment] subclass as the second destination in the navigation.
  */
-class GoalFragment : Fragment() {
+class GoalTemplateFragment : Fragment() {
 
-    private var _binding: FragmentGoalBinding? = null
+    private var _binding: FragmentGoalTemplateBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -28,7 +26,7 @@ class GoalFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentGoalBinding.inflate(inflater, container, false)
+        _binding = FragmentGoalTemplateBinding.inflate(inflater, container, false)
         return binding.root
 //        // Inflate the layout for this fragment
 //        val view = inflater.inflate(R.layout.fragment_goal, container, false)
@@ -43,26 +41,22 @@ class GoalFragment : Fragment() {
 //        view.addView(button)
 //
 //        return view
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        _binding!!.buttonClickMe.setOnClickListener {
-
-
-
-        }
-        val fileService = FileService(requireActivity())
-        val goals = fileService.getGoalsByUserID(1)
-        val fragManager = parentFragmentManager
-        val trans = fragManager.beginTransaction()
-        for(goal in goals){
-            Log.e("Goal Fragment",goal.toString())
-            trans.add(_binding!!.containerView.id,GoalTemplateFragment())
-            trans.addToBackStack(null)
-        }
-        trans.commit()
+        val goalList = FileService(requireActivity()).readGoals()
+        FileService(requireActivity()).logGoals()
+        val pb = binding.progressBarGoal
+        pb.max = 100 - goalList[0].goal.toInt()
+        pb.progress = 100 - goalList[0].current.toInt()
+        binding.textViewGoalPercentage.text = (100 - goalList[0].current.toInt()).toString()
+        binding.textViewGoalMetric2.text = goalList[0].current.toString() + " -> " + goalList[0].goal.toString()
+        binding.textViewGoalTitle.text = goalList[0].title
+        binding.textViewGoalDeadline2.text = goalList[0].deadline
+        binding.textViewGoalStatus.text = goalList[0].status
     }
 
     override fun onDestroyView() {

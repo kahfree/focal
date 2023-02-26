@@ -138,4 +138,9 @@
             android:id="@+id/action_bicepCurlFragment_to_postExerciseDashboard"
             app:destination="@id/postExerciseDashboard" />
     </fragment>
+    <fragment
+        android:id="@+id/goalTemplateFragment"
+        android:name="com.example.focal.GoalTemplateFragment"
+        android:label="fragment_goal_template"
+        tools:layout="@layout/fragment_goal_template" />
 </navigation>

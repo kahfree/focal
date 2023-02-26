@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "600042720927",
+    "firebase_url": "https://focal-69ab5-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "focal-69ab5",
+    "storage_bucket": "focal-69ab5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:600042720927:android:115266c01abcee83105caa",
+        "android_client_info": {
+          "package_name": "com.example.focal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "600042720927-k7cu7j7prcvs9mb1mcpss40vurdb8c0m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxLYlBfdRNHECDY2lKbhWRQjwCh0vlahM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "600042720927-k7cu7j7prcvs9mb1mcpss40vurdb8c0m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -23,6 +23,9 @@ import com.example.focal.databinding.FragmentLoginBinding
 
 import com.example.focal.R
 import com.example.focal.User
+import com.example.focal.UserClass
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.mongodb.MongoClient
 import com.mongodb.MongoException
 import org.bson.Document
@@ -36,6 +39,8 @@ class LoginFragment : Fragment() {
     private var _binding: FragmentLoginBinding? = null
 
     private lateinit var userToLogin: User
+
+    private lateinit var database : DatabaseReference
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
@@ -124,9 +129,21 @@ class LoginFragment : Fragment() {
 //        goalsFileInput.close()
         FileService(requireActivity()).resetGoals()
         FileService(requireActivity()).logGoals()
+        FileService(requireActivity()).resetUsers()
         FileService(requireActivity()).logUsers()
         FileService(requireActivity()).resetAttempts()
         FileService(requireActivity()).logAttempts()
+
+        database = FirebaseDatabase.getInstance().getReference("Users")
+//        val userClass = UserClass("John","Doe","john.doe@gmail.com","johndoe24")
+//        database.child("JohnDoe").setValue(userClass).addOnSuccessListener {
+//            Log.e("Firebase","User successfully added to Firebase DB!")
+//        }.addOnFailureListener {
+//            Log.e("Firebase","Failure with Firebase DB :/")
+//        }
+        database.child("JohnDoe").get().addOnSuccessListener {
+            Log.e("Firebase", "Got value ${it.value}")
+        }
 //        FileService(requireActivity()).resetUsers()
     }
 
