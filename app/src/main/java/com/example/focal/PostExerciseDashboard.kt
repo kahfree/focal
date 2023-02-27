@@ -2,6 +2,7 @@ package com.example.focal
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,8 @@ import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import com.example.focal.databinding.FragmentPostExerciseDashboardBinding
 import com.example.focal.databinding.FragmentSquatBinding
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -27,6 +30,7 @@ private const val ARG_PARAM2 = "param2"
 class PostExerciseDashboard : Fragment() {
     private var TAG = "PostExerciseDashboardFragment"
     private var _fragmentDashboardBinding: FragmentPostExerciseDashboardBinding? = null
+    private lateinit var database : DatabaseReference
     private val fragmentDashboardBinding
         get() = _fragmentDashboardBinding!!
 
@@ -77,10 +81,13 @@ class PostExerciseDashboard : Fragment() {
 //            else if (LocalDate.now() >= LocalDate.parse(goalList[0].deadline))
 //                FileService.updateGoalStatus("Expired")
         }
-
-        val newAttempt = Attempt(FileService.getNumRowsAttempts()+1,userID,exercise!!,
-            LocalDateTime.now().format(formatter),statOne.toFloat(),quality.toFloat(),attemptFeedback)
-        FileService.addAttempt(newAttempt)
+        val attemptTimestamp = LocalDateTime.now().format(formatter)
+        val newAttempt = Attempt(exercise!!, statOne.toFloat(),quality.toFloat(),attemptFeedback)
+//        FileService.addAttempt(newAttempt)
+        database = FirebaseDatabase.getInstance().getReference("Attempts").child(userID.toString())
+        database.child(attemptTimestamp).setValue(newAttempt).addOnSuccessListener {
+            Log.e("Firebase", "Attempts have been logged")
+        }
     }
     companion object {
         /**

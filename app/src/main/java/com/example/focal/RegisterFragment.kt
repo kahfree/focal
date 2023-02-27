@@ -9,7 +9,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.navigation.fragment.findNavController
 import com.example.focal.databinding.FragmentRegisterBinding
-import com.example.focal.databinding.FragmentSquatBinding
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -23,9 +24,11 @@ private const val ARG_PARAM2 = "param2"
  */
 class RegisterFragment : Fragment() {
     private var _fragmentRegisterBinding: FragmentRegisterBinding? = null
+
     private val fragmentRegisterBinding
         get() = _fragmentRegisterBinding!!
 
+    private lateinit var database : DatabaseReference
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -37,7 +40,7 @@ class RegisterFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        database = FirebaseDatabase.getInstance().getReference("Users")
         fragmentRegisterBinding.buttonRegister.setOnClickListener {
             //Create user and add to system
             Log.e("Register Fragment", "Pressed the fucking button!")
@@ -47,9 +50,12 @@ class RegisterFragment : Fragment() {
                 fragmentRegisterBinding.email.text.toString(),
                 fragmentRegisterBinding.password.text.toString())
 
+            database.child(newUser.username!!).setValue(newUser).addOnSuccessListener {
+                Log.e("Firebase", "User has been registered")
+            }
 
 
-            FileService(requireActivity()).addUser(newUser)
+//            FileService(requireActivity()).addUser(newUser!!)
             //Navigate to login screen
             Toast.makeText(requireContext(), "Registration was successful", Toast.LENGTH_SHORT)
             findNavController().navigate(R.id.action_RegisterFragment_to_LoginFragment)

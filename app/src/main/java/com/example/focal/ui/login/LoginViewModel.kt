@@ -1,19 +1,13 @@
 package com.example.focal.ui.login
 
-import android.nfc.Tag
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import android.util.Patterns
-import com.example.focal.FileService
 import com.example.focal.data.LoginRepository
 import com.example.focal.data.Result
 
 import com.example.focal.R
-import com.example.focal.User
-import io.realm.kotlin.Realm
-import io.realm.kotlin.RealmConfiguration
 
 class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel() {
 

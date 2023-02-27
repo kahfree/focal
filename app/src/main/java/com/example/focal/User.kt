@@ -1,23 +1,8 @@
 package com.example.focal
 
-import io.realm.kotlin.types.ObjectId
-import io.realm.kotlin.types.RealmObject
-import io.realm.kotlin.types.annotations.PrimaryKey
-
-class User(
-    userID : Int,
-    firstname : String,
-    lastname : String,
-    email: String,
-    password: String
-) {
-    val userID = userID
-    val firstname = firstname
-    val lastname = lastname
-    val email = email
-    var password = password
+data class User(val userID : Int? = null, val firstname: String? = null, val lastname : String? = null, val username : String? = null, val password : String? = null) {
     override fun toString(): String {
-        return "$userID,$firstname,$lastname,$email,$password"
+        return "User(userID=$userID, firstName=$firstname, lastname=$lastname, username=$username, password=$password)"
     }
 
 }

@@ -4,12 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.util.Log
-import java.io.BufferedWriter
-import java.io.File
-import java.io.FileWriter
 import java.io.PrintWriter
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class FileService(
     val activity: Activity
@@ -75,14 +70,14 @@ class FileService(
         fileOutputStream.close()
     }
 
-    fun getUsers(): List<User> {
-        var users = mutableListOf<User>()
+    fun getUsers(): List<UserTest> {
+        var userTests = mutableListOf<UserTest>()
         val userFileInput = activity.openFileInput("users.txt")
         val text = userFileInput.bufferedReader().use { it.readLines() }
         for (line in text) {
             var tmpList = line.split(",")
-            users.add(
-                User(
+            userTests.add(
+                UserTest(
                     tmpList[0].toInt(),
                     tmpList[1],
                     tmpList[2],
@@ -91,12 +86,12 @@ class FileService(
                 )
             )
         }
-        return users
+        return userTests
     }
 
-    fun addUser(user: User) {
+    fun addUser(userTest: UserTest) {
         val usersFileOutput = activity.openFileOutput("users.txt", Context.MODE_APPEND)
-        val newData = "$user\n"
+        val newData = "$userTest\n"
         usersFileOutput.write(newData.toByteArray())
         usersFileOutput.close()
     }
@@ -134,13 +129,10 @@ class FileService(
             var tmpList = line.split(",")
             attempts.add(
                 Attempt(
-                    tmpList[0].toInt(),
-                    tmpList[1].toInt(),
-                    tmpList[2],
-                    tmpList[3],
-                    tmpList[4].toFloat(),
-                    tmpList[5].toFloat(),
-                    tmpList[6]
+                    tmpList[0],
+                    tmpList[1].toFloat(),
+                    tmpList[2].toFloat(),
+                    tmpList[3]
                 )
             )
         }
@@ -156,13 +148,10 @@ class FileService(
             if(tmpList[1].toInt() == userID) {
                 attempts.add(
                     Attempt(
-                        tmpList[0].toInt(),
-                        tmpList[1].toInt(),
-                        tmpList[2],
-                        tmpList[3],
-                        tmpList[4].toFloat(),
-                        tmpList[5].toFloat(),
-                        tmpList[6]
+                        tmpList[0],
+                        tmpList[1].toFloat(),
+                        tmpList[2].toFloat(),
+                        tmpList[3]
                     )
                 )
             }
@@ -180,13 +169,10 @@ class FileService(
             if(tmpList[1].toInt() == userID && tmpList[2] == exercise) {
                 attempts.add(
                     Attempt(
-                        tmpList[0].toInt(),
-                        tmpList[1].toInt(),
-                        tmpList[2],
-                        tmpList[3],
-                        tmpList[4].toFloat(),
-                        tmpList[5].toFloat(),
-                        tmpList[6]
+                        tmpList[0],
+                        tmpList[1].toFloat(),
+                        tmpList[2].toFloat(),
+                        tmpList[3]
                     )
                 )
             }
@@ -230,13 +216,13 @@ class FileService(
         return getAttempts().size
     }
 
-    fun getUserByID(userID: Int): User{
+    fun getUserByID(userID: Int): UserTest{
         val users = getUsers()
         for(user in users){
             if(user.userID == userID)
                 return user
         }
-        return User(0,"n/a","n/a","n/a","n/a")
+        return UserTest(0,"n/a","n/a","n/a","n/a")
     }
 
     @SuppressLint("NewApi")
