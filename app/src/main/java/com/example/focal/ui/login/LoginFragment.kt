@@ -11,13 +11,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
-import com.example.focal.FileService
+import com.example.focal.*
 import com.example.focal.databinding.FragmentLoginBinding
 
 
-import com.example.focal.R
-import com.example.focal.User
-import com.example.focal.UserTest
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -93,13 +90,29 @@ class LoginFragment : Fragment() {
             Log.e("Firebase", "Got value ${it.value}")
         }
 
+
+//        val goalList = FileService(requireActivity()).readGoals()
+//        goalList.forEach {
+//            val goals = FirebaseDatabase.getInstance().getReference("Goals").child(it.userID)
+//            goals.child(it.exercise).child(it.title).setValue(it)
+//        }
+        val timeList = mutableListOf("28-01-2023 12:30:00","28-01-2023 12:37:00","02-02-2023 10:33:11","02-02-2023 10:56:46")
+        var index = 0
+        val attemptList = FileService(requireActivity()).getAttempts()
+        attemptList.forEach {
+            val attempts = FirebaseDatabase.getInstance().getReference("Attempts").child("U1")
+            attempts.child(timeList.get(index)).setValue(it)
+            index++
+        }
+
+
     }
 
     @SuppressLint("NewApi")
     private fun login(): Boolean{
 
         for(user in listOfUsers){
-            if(user?.username == binding.username.text.toString() && user?.password == binding.password.text.toString())
+            if(user?.email == binding.username.text.toString() && user?.password == binding.password.text.toString())
             {
                 userToLogin = user
                 return true
@@ -112,7 +125,7 @@ class LoginFragment : Fragment() {
         val appContext = context?.applicationContext ?: return
         Toast.makeText(appContext, welcome, Toast.LENGTH_LONG).show()
         findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment, Bundle().apply {
-            putInt("userID", user.userID!!)
+            putString("userID", user.userID!!)
         })
     }
 

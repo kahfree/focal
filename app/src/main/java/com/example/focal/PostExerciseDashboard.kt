@@ -74,6 +74,20 @@ class PostExerciseDashboard : Fragment() {
 
         FileService.logGoals()
         val goalList = FileService.readGoals()
+        database = FirebaseDatabase.getInstance().getReference("Goals").child(userID.toString())
+        database.get().addOnSuccessListener {
+            it.children.forEach {
+                val goal: Goal? = it.getValue(Goal::class.java)
+
+                when (it.key) {
+                    "Max Depth" -> {
+                        if (requireArguments().getFloat("maxDepth") <= goal?.current!!)
+                            goal.current = requireArguments().getFloat("maxDepth")
+                            database.child("Max Depth").setValue(goal)
+                    }
+                }
+            }
+        }
         if(goalList[0].current > requireArguments().getFloat("maxDepth")) {
             FileService.updateGoalProgress(requireArguments().getFloat("maxDepth"))
             if(requireArguments().getFloat("maxDepth") <= goalList[0].goal)

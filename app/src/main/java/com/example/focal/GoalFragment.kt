@@ -11,6 +11,8 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
 import com.example.focal.databinding.FragmentGoalBinding
 import com.example.focal.ui.login.LoginFragment
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 
 
 /**
@@ -23,12 +25,22 @@ class GoalFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+    private lateinit var goalList : MutableList<Goal>
+    private lateinit var database : DatabaseReference
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentGoalBinding.inflate(inflater, container, false)
+
+        database = FirebaseDatabase.getInstance().getReference("Goals")
+        database.child("U1").get().addOnSuccessListener {
+            it.children.forEach {
+                val goal = it.getValue(Goal::class.java)
+                goalList.add(goal!!)
+            }
+        }
         return binding.root
 //        // Inflate the layout for this fragment
 //        val view = inflater.inflate(R.layout.fragment_goal, container, false)
@@ -54,7 +66,7 @@ class GoalFragment : Fragment() {
 
         }
         val fileService = FileService(requireActivity())
-        val goals = fileService.getGoalsByUserID(1)
+        val goals = fileService.getGoalsByUserID("U1")
         val fragManager = parentFragmentManager
         val trans = fragManager.beginTransaction()
         for(goal in goals){

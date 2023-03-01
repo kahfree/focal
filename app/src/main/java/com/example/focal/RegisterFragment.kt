@@ -28,6 +28,8 @@ class RegisterFragment : Fragment() {
     private val fragmentRegisterBinding
         get() = _fragmentRegisterBinding!!
 
+    private var numUsers: Int = 0
+
     private lateinit var database : DatabaseReference
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,22 +37,24 @@ class RegisterFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         _fragmentRegisterBinding = FragmentRegisterBinding.inflate(inflater, container, false)
+        database = FirebaseDatabase.getInstance().getReference("Users")
+        database.get().addOnSuccessListener { numUsers = it.children.count() }
         return fragmentRegisterBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        database = FirebaseDatabase.getInstance().getReference("Users")
+
         fragmentRegisterBinding.buttonRegister.setOnClickListener {
             //Create user and add to system
             Log.e("Register Fragment", "Pressed the fucking button!")
-            val newUser = User(
-                FileService(requireActivity()).getNumRowsUsers()+1,fragmentRegisterBinding.firstname.text.toString(),
+            val newUser = User("U" +
+                    (numUsers+1),fragmentRegisterBinding.firstname.text.toString(),
                 fragmentRegisterBinding.lastname.text.toString(),
                 fragmentRegisterBinding.email.text.toString(),
                 fragmentRegisterBinding.password.text.toString())
 
-            database.child(newUser.username!!).setValue(newUser).addOnSuccessListener {
+            database.child(newUser.userID!!).setValue(newUser).addOnSuccessListener {
                 Log.e("Firebase", "User has been registered")
             }
 

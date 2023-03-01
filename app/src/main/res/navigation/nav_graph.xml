@@ -25,7 +25,7 @@
             app:destination="@id/shoulderPressFragment" />
         <argument
             android:name="userID"
-            app:argType="integer" />
+            app:argType="string" />
         <action
             android:id="@+id/action_HomeFragment_to_bicepCurlFragment"
             app:destination="@id/bicepCurlFragment" />
@@ -41,7 +41,7 @@
             app:destination="@id/HomeFragment" />
         <argument
             android:name="userID"
-            app:argType="integer" />
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/ProfileFragment"
@@ -53,7 +53,7 @@
             app:destination="@id/HomeFragment" />
         <argument
             android:name="userID"
-            app:argType="integer" />
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/SquatFragment"
@@ -68,7 +68,7 @@
             app:destination="@id/postExerciseDashboard" />
         <argument
             android:name="userID"
-            app:argType="integer" />
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/LoginFragment"
@@ -115,7 +115,7 @@
             app:argType="string" />
         <argument
             android:name="userID"
-            app:argType="integer" />
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/shoulderPressFragment"
@@ -127,7 +127,7 @@
             app:destination="@id/postExerciseDashboard" />
         <argument
             android:name="userID"
-            app:argType="integer" />
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/bicepCurlFragment"

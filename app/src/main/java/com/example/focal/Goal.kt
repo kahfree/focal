@@ -3,8 +3,8 @@ package com.example.focal
 import java.util.Date
 
 class Goal(
-    goalID : Int,
-    userID : Int,
+    goalID : String,
+    userID : String,
     exercise : String,
     goal : Float,
     current : Float,

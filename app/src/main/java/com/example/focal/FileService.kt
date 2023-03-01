@@ -17,8 +17,8 @@ class FileService(
             var tmpList = line.split(",")
             goalList.add(
                 Goal(
-                    tmpList[0].toInt(),
-                    tmpList[1].toInt(),
+                    tmpList[0],
+                    tmpList[1],
                     tmpList[2],
                     tmpList[3].toFloat(),
                     tmpList[4].toFloat(),
@@ -63,8 +63,8 @@ class FileService(
     fun resetGoals(){
         val fileOutputStream = activity.openFileOutput("goals.txt", Context.MODE_PRIVATE)
         val printWriter = PrintWriter(fileOutputStream)
-        printWriter.println("1,1,Squat,45,54.76,13-02-2023,Max Depth,Ongoing")
-        printWriter.println("2,1,Squat,85,73.22,08-02-2023,Quality,Ongoing")
+        printWriter.println("G1,U1,Squat,45,54.76,13-02-2023,Max Depth,Ongoing")
+        printWriter.println("G2,U1,Squat,85,73.22,08-02-2023,Quality,Ongoing")
         printWriter.flush()
         printWriter.close()
         fileOutputStream.close()
@@ -129,10 +129,10 @@ class FileService(
             var tmpList = line.split(",")
             attempts.add(
                 Attempt(
-                    tmpList[0],
-                    tmpList[1].toFloat(),
-                    tmpList[2].toFloat(),
-                    tmpList[3]
+                    tmpList[2],
+                    tmpList[4].toFloat(),
+                    tmpList[5].toFloat(),
+                    tmpList[6]
                 )
             )
         }
@@ -194,10 +194,10 @@ class FileService(
 //        02-02-2023 10:33:11
 //        28-01-2023 12:30:00
 //        2023-01-28T12:30:00.43
-        printWriter.println("1,1,Squat,28-01-2023 12:30:00,40.34,73.56,Knees Out!-Wider Stance!")
-        printWriter.println("2,1,Squat,28-01-2023 12:37:00,36.26,77.32,Wider Stance!")
-        printWriter.println("3,1,Shoulder Press,02-02-2023 10:33:11,60.69,92.6,Both Arms!")
-        printWriter.println("4,1,Shoulder Press,02-02-2023 10:56:46,50.55,93.38,Both Arms!")
+        printWriter.println("A1,U1,Squat,28-01-2023 12:30:00,40.34,73.56,Knees Out!-Wider Stance!")
+        printWriter.println("A2,U1,Squat,28-01-2023 12:37:00,36.26,77.32,Wider Stance!")
+        printWriter.println("A3,U1,Shoulder Press,02-02-2023 10:33:11,60.69,92.6,Both Arms!")
+        printWriter.println("A4,U1,Shoulder Press,02-02-2023 10:56:46,50.55,93.38,Both Arms!")
         printWriter.flush()
         printWriter.close()
         fileOutputStream.close()
@@ -234,8 +234,8 @@ class FileService(
             var tmpList = line.split(",")
             goals.add(
                 Goal(
-                    tmpList[0].toInt(),
-                    tmpList[1].toInt(),
+                    tmpList[0],
+                    tmpList[1],
                     tmpList[2],
                     tmpList[3].toFloat(),
                     tmpList[4].toFloat(),
@@ -248,7 +248,7 @@ class FileService(
         return goals
     }
 
-    fun getGoalsByUserID(userID : Int) : List<Goal> {
+    fun getGoalsByUserID(userID : String) : List<Goal> {
         var goals = getGoals()
         var userGoals = mutableListOf<Goal>()
         for(goal in goals){
