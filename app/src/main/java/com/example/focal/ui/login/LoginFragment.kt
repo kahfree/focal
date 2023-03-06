@@ -96,14 +96,14 @@ class LoginFragment : Fragment() {
 //            val goals = FirebaseDatabase.getInstance().getReference("Goals").child(it.userID)
 //            goals.child(it.exercise).child(it.title).setValue(it)
 //        }
-        val timeList = mutableListOf("28-01-2023 12:30:00","28-01-2023 12:37:00","02-02-2023 10:33:11","02-02-2023 10:56:46")
-        var index = 0
-        val attemptList = FileService(requireActivity()).getAttempts()
-        attemptList.forEach {
-            val attempts = FirebaseDatabase.getInstance().getReference("Attempts").child("U1")
-            attempts.child(timeList.get(index)).setValue(it)
-            index++
-        }
+//        val timeList = mutableListOf("28-01-2023 12:30:00","28-01-2023 12:37:00","02-02-2023 10:33:11","02-02-2023 10:56:46")
+//        var index = 0
+//        val attemptList = FileService(requireActivity()).getAttempts()
+//        attemptList.forEach {
+//            val attempts = FirebaseDatabase.getInstance().getReference("Attempts").child("U1")
+//            attempts.child(timeList.get(index)).setValue(it)
+//            index++
+//        }
 
 
     }

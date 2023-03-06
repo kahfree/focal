@@ -65,7 +65,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     private var goodSquat : Float = 0f
     private var badSquat : Float = 0f
     private lateinit var squatFeedback : HashMap<String,String>
-    private var userID = 0
+    private var userID: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -86,7 +86,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         timeRemaining = LocalTime.now().plusSeconds(20)
         fragmentSquatBinding.buttonDashboard.visibility = View.INVISIBLE
         squatFeedback = HashMap<String, String>()
-        userID = requireArguments().getInt("userID")
+        userID = requireArguments().getString("userID")!!
         maxDepth = 361f
         goodSquat = 0f
         badSquat = 0f
@@ -180,7 +180,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                 putString("exercise", "Squat")
                 putFloat("exerciseQuality", quality)
                 putSerializable("feedbackToGive",squatFeedback)
-                putInt("userID",userID)
+                putString("userID",userID)
             })
         }
 

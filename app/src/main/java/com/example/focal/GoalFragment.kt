@@ -1,18 +1,19 @@
 package com.example.focal
 
-import android.R
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
-import androidx.fragment.app.commit
+import androidx.navigation.fragment.findNavController
 import com.example.focal.databinding.FragmentGoalBinding
-import com.example.focal.ui.login.LoginFragment
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 
 /**
@@ -25,22 +26,31 @@ class GoalFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-    private lateinit var goalList : MutableList<Goal>
+    private var goalList : MutableList<Goal> = mutableListOf()
     private lateinit var database : DatabaseReference
+    private lateinit var userID: String
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        userID = requireArguments().getString("userID")!!
+
+
+        database = FirebaseDatabase.getInstance().getReference("Goals")
+        database.child(userID).get().addOnSuccessListener {
+            it.children.forEach {
+                it.children.forEach {
+                    val goal = it.getValue(Goal::class.java)
+                    Log.e("Goal converted", goal.toString())
+                    goalList.add(goal!!)
+                }
+            }
+        }
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentGoalBinding.inflate(inflater, container, false)
-
-        database = FirebaseDatabase.getInstance().getReference("Goals")
-        database.child("U1").get().addOnSuccessListener {
-            it.children.forEach {
-                val goal = it.getValue(Goal::class.java)
-                goalList.add(goal!!)
-            }
-        }
         return binding.root
 //        // Inflate the layout for this fragment
 //        val view = inflater.inflate(R.layout.fragment_goal, container, false)
@@ -60,21 +70,29 @@ class GoalFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        _binding!!.buttonClickMe.setOnClickListener {
-
-
-
+        binding.buttonAddGoal.setOnClickListener {
+            findNavController().navigate(com.example.focal.R.id.action_GoalFragment_to_addGoalFragment, Bundle().apply {
+                putString("userID", userID)
+            })
         }
         val fileService = FileService(requireActivity())
-        val goals = fileService.getGoalsByUserID("U1")
+        val userID = requireArguments().getString("userID")!!
+        val goals = fileService.getGoalsByUserID(userID)
         val fragManager = parentFragmentManager
         val trans = fragManager.beginTransaction()
-        for(goal in goals){
-            Log.e("Goal Fragment",goal.toString())
-            trans.add(_binding!!.containerView.id,GoalTemplateFragment())
-            trans.addToBackStack(null)
+        var index= 0
+        GlobalScope.launch {
+        suspend {
+            delay(100)
+            Log.e("GoalList",goalList.count().toString())
+            for(goal in goalList){
+                Log.e("Goal Fragment",binding.goalContainer.id.toString())
+                trans.add(binding.goalContainer.id,GoalTemplateFragment(goal))
+                trans.addToBackStack(null)
+            }
+            trans.commit()
+        }.invoke()
         }
-        trans.commit()
     }
 
     override fun onDestroyView() {

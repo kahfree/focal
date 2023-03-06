@@ -56,4 +56,13 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
+    <string-array name="exercises">
+        <item>Squat</item>
+        <item>Shoulder Press</item>
+        <item>Bicep Curl</item>
+    </string-array>
+    <string-array name="titles">
+        <item>Max Depth</item>
+        <item>Quality</item>
+    </string-array>
 </resources>

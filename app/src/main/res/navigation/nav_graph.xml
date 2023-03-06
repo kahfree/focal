@@ -42,6 +42,9 @@
         <argument
             android:name="userID"
             app:argType="string" />
+        <action
+            android:id="@+id/action_GoalFragment_to_addGoalFragment"
+            app:destination="@id/addGoalFragment" />
     </fragment>
     <fragment
         android:id="@+id/ProfileFragment"
@@ -143,4 +146,16 @@
         android:name="com.example.focal.GoalTemplateFragment"
         android:label="fragment_goal_template"
         tools:layout="@layout/fragment_goal_template" />
+    <fragment
+        android:id="@+id/addGoalFragment"
+        android:name="com.example.focal.AddGoalFragment"
+        android:label="fragment_add_goal"
+        tools:layout="@layout/fragment_add_goal" >
+        <action
+            android:id="@+id/action_addGoalFragment_to_GoalFragment"
+            app:destination="@id/GoalFragment" />
+        <argument
+            android:name="userID"
+            app:argType="string" />
+    </fragment>
 </navigation>

@@ -62,7 +62,7 @@ class ShoulderPressFragment : Fragment(){
     private var badSquat : Float = 0f
     private var topOfMovementReached : Boolean = false
     private lateinit var squatFeedback : HashMap<String,String>
-    private var userID : Int = 0
+    private var userID : String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -94,7 +94,7 @@ class ShoulderPressFragment : Fragment(){
         squatFeedback = HashMap<String, String>()
         // Initialize our background executor
         cameraExecutor = Executors.newSingleThreadExecutor()
-        userID = requireArguments().getInt("userID")
+        userID = requireArguments().getString("userID")!!
         maxDepth = 361f
         goodSquat = 0f
         badSquat = 0f
@@ -187,7 +187,7 @@ class ShoulderPressFragment : Fragment(){
                 putString("exercise", "Shoulder Press")
                 putFloat("exerciseQuality", quality)
                 putSerializable("feedbackToGive",squatFeedback)
-                putInt("userID", userID)
+                putString("userID", userID)
             })
         }
 

@@ -33,31 +33,31 @@ class FirstFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val userID = requireArguments().getInt("userID")
+        val userID = requireArguments().getString("userID")
 
         binding.cardSquat.setOnClickListener {
             findNavController().navigate(R.id.action_HomeFragment_to_SquatFragment, Bundle().apply {
-                putInt("userID", userID)
+                putString("userID", userID)
             })
         }
         binding.cardShoulderPress.setOnClickListener {
             findNavController().navigate(R.id.action_HomeFragment_to_shoulderPressFragment, Bundle().apply {
-                putInt("userID", userID)
+                putString("userID", userID)
             })
         }
         binding.cardBicepCurl.setOnClickListener {
             findNavController().navigate(R.id.action_HomeFragment_to_bicepCurlFragment, Bundle().apply {
-                putInt("userID", userID)
+                putString("userID", userID)
             })
         }
         binding.cardProfile.setOnClickListener {
             findNavController().navigate(R.id.action_HomeFragment_to_ProfileFragment, Bundle().apply {
-                putInt("userID", userID)
+                putString("userID", userID)
             })
         }
         binding.cardGoals.setOnClickListener {
             findNavController().navigate(R.id.action_HomeFragment_to_GoalFragment, Bundle().apply {
-                putInt("userID", userID)
+                putString("userID", userID)
             })
         }
     }
