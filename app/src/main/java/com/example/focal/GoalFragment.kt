@@ -85,12 +85,14 @@ class GoalFragment : Fragment() {
         suspend {
             delay(100)
             Log.e("GoalList",goalList.count().toString())
+
             for(goal in goalList){
                 Log.e("Goal Fragment",binding.goalContainer.id.toString())
                 trans.add(binding.goalContainer.id,GoalTemplateFragment(goal))
                 trans.addToBackStack(null)
             }
             trans.commit()
+
         }.invoke()
         }
     }

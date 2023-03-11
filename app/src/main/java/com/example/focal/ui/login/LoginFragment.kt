@@ -57,6 +57,7 @@ class LoginFragment : Fragment() {
         val passwordEditText = binding.password
         val loginButton = binding.login
         val loadingProgressBar = binding.loading
+
         database = FirebaseDatabase.getInstance().getReference("Users")
         database.get().addOnSuccessListener {
             it.children.forEach {
@@ -66,6 +67,7 @@ class LoginFragment : Fragment() {
                 Log.e("UserList", it.toString())
             }
         }
+
         loginButton.setOnClickListener {
             loadingProgressBar.visibility = View.VISIBLE
             if(login())
