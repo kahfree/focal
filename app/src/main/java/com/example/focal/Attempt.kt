@@ -8,7 +8,7 @@ data class Attempt(val exercise : String? = null, val statOne: Float? = null, va
         return "Attempt(exercise=$exercise, statOne=$statOne, statTwo=$statTwo, feedback=$feedback)"
     }
     fun display(): String{
-        return "\nDepth: $statOne Quality: $statTwo\nTips: $feedback"
+        return "Exercise: $exercise\nDepth: $statOne Quality: $statTwo\nTips: $feedback"
     }
 }
 //class Attempt(

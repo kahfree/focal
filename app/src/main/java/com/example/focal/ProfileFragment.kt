@@ -22,14 +22,16 @@ class ProfileFragment : Fragment() {
     // onDestroyView.
     private val fragmentProfileBinding get() = _fragmentProfileBinding!!
     private var attemptList : MutableList<Attempt> = mutableListOf()
-    private lateinit var user : String
+    private var user : User? = null
     private lateinit var userID: String
 
     private lateinit var database : DatabaseReference
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         userID = requireArguments().getString("userID")!!
-        user = FirebaseDatabase.getInstance().getReference("Users").child(userID).get().toString()
+        FirebaseDatabase.getInstance().getReference("Users").child(userID).get().addOnSuccessListener {
+            user = it.getValue(User::class.java)
+        }
 
         database = FirebaseDatabase.getInstance().getReference("Attempts")
         database.child(userID).get().addOnSuccessListener {
@@ -66,9 +68,9 @@ class ProfileFragment : Fragment() {
             Log.e("Suspend","Inside the suspend")
             delay(1000)
             Log.e("AttemptList", attemptList.count().toString())
-            Log.e("User", user)
+            Log.e("User", user.toString())
             requireActivity().runOnUiThread {
-            userText.text = user
+            userText.text = user.toString()
             userAttempts.text = attemptList.map { it -> it.display() }.joinToString("\n\n")
             }
         }
