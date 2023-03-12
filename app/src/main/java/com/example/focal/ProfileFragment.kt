@@ -66,7 +66,7 @@ class ProfileFragment : Fragment() {
         GlobalScope.launch {
             Log.e("GlobalScope","Inside the Coroutine")
             Log.e("Suspend","Inside the suspend")
-            delay(1000)
+            delay(100)
             Log.e("AttemptList", attemptList.count().toString())
             Log.e("User", user.toString())
             requireActivity().runOnUiThread {

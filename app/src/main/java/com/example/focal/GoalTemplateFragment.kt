@@ -64,9 +64,15 @@ class GoalTemplateFragment(goal: Goal) : Fragment() {
 //        FileService(requireActivity()).logGoals()
         Log.e("Goal Template",goal1.toString())
         val pb = binding.progressBarGoal
-        pb.max = 100 - goal1.goal!!.toInt()
-        pb.progress = 100 - goal1.current!!.toInt()
-        binding.textViewGoalPercentage.text = (100 - goal1.current!!.toInt()).toString()
+        var progress = 0
+        if(goal1.title!! == "Max Depth") {
+            progress = ((goal1.goal!! / goal1.current!!) * 100).toInt()
+        }else {
+            progress = ((goal1.current!! / goal1.goal!!) * 100).toInt()
+        }
+        pb.max = 100
+        pb.progress = progress
+        binding.textViewGoalPercentage.text = progress.toString() + "%"
         binding.textViewGoalMetric2.text = goal1.current.toString() + " -> " + goal1.goal.toString()
         binding.textViewGoalTitle.text = goal1.title
         binding.textViewGoalDeadline2.text = goal1.deadline
