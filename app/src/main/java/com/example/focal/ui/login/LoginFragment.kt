@@ -27,11 +27,9 @@ class LoginFragment : Fragment() {
     private lateinit var loginViewModel: LoginViewModel
     private var _binding: FragmentLoginBinding? = null
 
-    private lateinit var userTestToLogin: UserTest
     private lateinit var userToLogin : User
     private  var listOfUsers : MutableList<User?> = mutableListOf()
 
-    private lateinit var database : DatabaseReference
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
@@ -40,7 +38,7 @@ class LoginFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
         return binding.root
@@ -58,16 +56,8 @@ class LoginFragment : Fragment() {
         val loginButton = binding.login
         val loadingProgressBar = binding.loading
 
-//        database = FirebaseDatabase.getInstance().getReference("Users")
-//        database.get().addOnSuccessListener {
-//            it.children.forEach {
-//                listOfUsers.add(it.getValue(User::class.java))
-//            }
-//            listOfUsers.forEach {
-//                Log.e("UserList", it.toString())
-//            }
-//        }
         listOfUsers =  FocalDB.getUsers()
+
         loginButton.setOnClickListener {
             loadingProgressBar.visibility = View.VISIBLE
             if(login())
@@ -88,33 +78,13 @@ class LoginFragment : Fragment() {
         FileService(requireActivity()).resetAttempts()
         FileService(requireActivity()).logAttempts()
 
-//        database.child("JDoe429").get().addOnSuccessListener {
-//            Log.e("Firebase", "Got value ${it.value}")
-//        }
-
-
-//        val goalList = FileService(requireActivity()).readGoals()
-//        goalList.forEach {
-//            val goals = FirebaseDatabase.getInstance().getReference("Goals").child(it.userID)
-//            goals.child(it.exercise).child(it.title).setValue(it)
-//        }
-//        val timeList = mutableListOf("28-01-2023 12:30:00","28-01-2023 12:37:00","02-02-2023 10:33:11","02-02-2023 10:56:46")
-//        var index = 0
-//        val attemptList = FileService(requireActivity()).getAttempts()
-//        attemptList.forEach {
-//            val attempts = FirebaseDatabase.getInstance().getReference("Attempts").child("U1")
-//            attempts.child(timeList.get(index)).setValue(it)
-//            index++
-//        }
-
-
     }
 
     @SuppressLint("NewApi")
     private fun login(): Boolean{
 
         for(user in listOfUsers){
-            if(user?.email == binding.username.text.toString() && user?.password == binding.password.text.toString())
+            if(user?.email == binding.username.text.toString() && user.password == binding.password.text.toString())
             {
                 userToLogin = user
                 return true

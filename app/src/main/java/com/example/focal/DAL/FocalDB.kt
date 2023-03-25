@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.util.Log
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 
 object FocalDB{
     private val database : DatabaseReference = FirebaseDatabase.getInstance().getReference("")
@@ -40,8 +42,10 @@ object FocalDB{
         return users
     }
 
-    fun addUser(userTest: UserTest) {
-
+    fun addUser(newUser: User) {
+        database.child("Users").child(newUser.userID!!).setValue(newUser).addOnSuccessListener {
+            Log.e("Firebase", "User has been registered")
+        }
     }
 
     fun logUsers() {
@@ -52,8 +56,8 @@ object FocalDB{
 
     }
 
-    fun getNumRowsUsers(): Int {
-        return 1
+    fun getNumUsers(): Int {
+        return getUsers().size
     }
 
     @SuppressLint("NewApi")
