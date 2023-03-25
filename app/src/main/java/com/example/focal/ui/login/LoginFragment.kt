@@ -58,16 +58,16 @@ class LoginFragment : Fragment() {
         val loginButton = binding.login
         val loadingProgressBar = binding.loading
 
-        database = FirebaseDatabase.getInstance().getReference("Users")
-        database.get().addOnSuccessListener {
-            it.children.forEach {
-                listOfUsers.add(it.getValue(User::class.java))
-            }
-            listOfUsers.forEach {
-                Log.e("UserList", it.toString())
-            }
-        }
-
+//        database = FirebaseDatabase.getInstance().getReference("Users")
+//        database.get().addOnSuccessListener {
+//            it.children.forEach {
+//                listOfUsers.add(it.getValue(User::class.java))
+//            }
+//            listOfUsers.forEach {
+//                Log.e("UserList", it.toString())
+//            }
+//        }
+        listOfUsers =  FocalDB.getUsers()
         loginButton.setOnClickListener {
             loadingProgressBar.visibility = View.VISIBLE
             if(login())
@@ -88,9 +88,9 @@ class LoginFragment : Fragment() {
         FileService(requireActivity()).resetAttempts()
         FileService(requireActivity()).logAttempts()
 
-        database.child("JDoe429").get().addOnSuccessListener {
-            Log.e("Firebase", "Got value ${it.value}")
-        }
+//        database.child("JDoe429").get().addOnSuccessListener {
+//            Log.e("Firebase", "Got value ${it.value}")
+//        }
 
 
 //        val goalList = FileService(requireActivity()).readGoals()
