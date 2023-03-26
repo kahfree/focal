@@ -26,6 +26,7 @@ import androidx.core.os.HandlerCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.focal.databinding.FragmentSquatBinding
+import com.example.focal.helper.ExerciseAnalysis
 import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.pose.Pose
@@ -66,6 +67,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     private var badSquat : Float = 0f
     private lateinit var squatFeedback : HashMap<String,String>
     private var userID: String = ""
+    private val exerciseAnalysis : ExerciseAnalysis = ExerciseAnalysis("knee","squat")
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -195,77 +197,44 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun processPose(pose: Pose, bitmap: Bitmap? = null){
         try{
-            val leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER)
-            val rightShoulder = pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER)
-
-            val leftElbow = pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW)
-            val rightElbow = pose.getPoseLandmark(PoseLandmark.RIGHT_ELBOW)
-
-            val leftWrist = pose.getPoseLandmark(PoseLandmark.LEFT_WRIST)
-            val rightWrist = pose.getPoseLandmark(PoseLandmark.RIGHT_WRIST)
-
-            val leftHip = pose.getPoseLandmark(PoseLandmark.LEFT_HIP)
-            val rightHip = pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
+//            val leftHip = pose.getPoseLandmark(PoseLandmark.LEFT_HIP)
+//            val rightHip = pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
+//
+//            val leftKnee = pose.getPoseLandmark(PoseLandmark.LEFT_KNEE)
+//            val rightKnee = pose.getPoseLandmark(PoseLandmark.RIGHT_KNEE)
+//
+//            val leftAnkle = pose.getPoseLandmark(PoseLandmark.LEFT_ANKLE)
+//            val rightAnkle = pose.getPoseLandmark(PoseLandmark.RIGHT_ANKLE)
 
 
-            val leftKnee = pose.getPoseLandmark(PoseLandmark.LEFT_KNEE)
-            val rightKnee = pose.getPoseLandmark(PoseLandmark.RIGHT_KNEE)
-
-
-            val leftAnkle = pose.getPoseLandmark(PoseLandmark.LEFT_ANKLE)
-            val rightAnkle = pose.getPoseLandmark(PoseLandmark.RIGHT_ANKLE)
-
-            val leftEye = pose.getPoseLandmark(PoseLandmark.LEFT_EYE)
-            val rightEye = pose.getPoseLandmark(PoseLandmark.RIGHT_EYE)
-
-            // Get confidence levels
-            val lEyeConf = leftEye?.inFrameLikelihood
-            val rEyeConf = rightEye?.inFrameLikelihood
-            val lElbowConf = leftElbow?.inFrameLikelihood
-            val rElbowConf = rightElbow?.inFrameLikelihood
-
-
-//            Log.e(TAG,"**CONFIDENCE LEVELS OF LANDMARKS**\nEyes: $lEyeConf $rEyeConf\nElbows: $lElbowConf $rElbowConf")
-
+            val landmarkList = exerciseAnalysis.getJointLandmarks(pose)
             val graphicOverlay = graphicOverlay!!
             graphicOverlay.clear()
 
             //Get angles of each joint
-            val leftElbowAngle = getAngle(leftWrist!!,leftElbow!!,leftShoulder!!)
-            val rightElbowAngle = getAngle(rightWrist!!,rightElbow!!, rightShoulder!!)
-            val leftKneeAngle = getAngle(leftAnkle!!, leftKnee!!, leftHip!!)
-            val rightKneeAngle = getAngle(rightAnkle!!, rightKnee!!, rightHip!!)
-            val leftHipAngle = getAngle(leftKnee!!,leftHip!!,leftShoulder!!)
-            val rightHipAngle = getAngle(rightKnee!!,rightHip!!,rightShoulder!!)
+            val LkneeAngle = ExerciseAnalysis.getAngle(landmarkList["left ankle"]!!,landmarkList["left knee"]!!,landmarkList["left hip"]!!)
+            val RkneeAngle = ExerciseAnalysis.getAngle(landmarkList["right ankle"]!!,landmarkList["right knee"]!!,landmarkList["right hip"]!!)
+//            val leftKneeAngle = getAngle(leftAnkle!!, leftKnee!!, leftHip!!)
+//            val rightKneeAngle = getAngle(rightAnkle!!, rightKnee!!, rightHip!!)
 
             //Get average values between both joints
-            val avgElbowAngle = (leftElbowAngle + rightElbowAngle) / 2
-            val avgKneeAngle = (leftKneeAngle + rightKneeAngle) / 2
-            val avgHipAngle = (leftHipAngle + rightHipAngle) / 2
-
-            //Log average values to console
-//            Log.e(TAG,"Angle of elbows: $avgElbowAngle" )
-//            Log.e(TAG, "Angle of knees: $avgKneeAngle")
-//            Log.e(TAG, "Angle of hips: $avgHipAngle")
+            val avgKneeAngle = (LkneeAngle + RkneeAngle) / 2
 
             //Get textview's for labels
-            var eyes_textview = fragmentSquatBinding.textEyesValue
-            var timer_textview = fragmentSquatBinding.textTimerValue
+            val eyes_textview = fragmentSquatBinding.textEyesValue
+            val timer_textview = fragmentSquatBinding.textTimerValue
             val remaining_time = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 Duration.between(LocalTime.now(),timeRemaining).toSecondsPart()
-            } else {
-                //blah blah
-            }
+            } else null
             eyes_textview.setTextColor(Color.GREEN)
             //Print new values onto labels
             if(avgKneeAngle < maxDepth)
                 maxDepth = avgKneeAngle.toFloat()
             activity?.runOnUiThread {
-                if(checkSquat(avgKneeAngle)) {
-                    checkForm(pose)
+                if(exerciseAnalysis.checkExercise(avgKneeAngle)) {
+                    checkForm(exerciseAnalysis.getFeedbackLandmarks(pose))
                     eyes_textview.setTextColor(Color.GREEN)
-                }
-                else {
+                }else {
                     fragmentSquatBinding.textFeedback.text = ""
                     eyes_textview.setTextColor(Color.RED)
                 }
@@ -282,19 +251,23 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         }
     }
 
-    private fun checkForm(pose : Pose){
+    private fun checkForm(feedbackLandmark : HashMap<String,PoseLandmark?>){
         val feedback : MutableList<String> = mutableListOf()
         //Check if feet are shoulder-width apart -> "Feet should be shoulder-width or slightly further apart"
         //Get the landmarks needed
-        val leftAnkle = pose.getPoseLandmark(PoseLandmark.LEFT_ANKLE)
-        val rightAnkle = pose.getPoseLandmark(PoseLandmark.RIGHT_ANKLE)
-        val leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER)
-        val rightShoulder = pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER)
+        val leftAnkle = feedbackLandmark["left ankle"]
+        val rightAnkle = feedbackLandmark["right ankle"]
+        val leftShoulder = feedbackLandmark["left shoulder"]
+        val rightShoulder = feedbackLandmark["right shoulder"]
+        val leftKnee = feedbackLandmark["left knee"]
+        val rightKnee = feedbackLandmark["right knee"]
+        val leftHip = feedbackLandmark["left hip"]
         var shoulderDistance = 0f
         var feetDistance = 0f
 
         //The stance should be the same width or wider than the shoulders
         if(leftAnkle != null && rightAnkle != null && leftShoulder != null && rightShoulder != null) {
+
             shoulderDistance = getDistanceBetweenPoints(leftShoulder.position.x,rightShoulder.position.x,leftShoulder.position.y,rightShoulder.position.y)
             feetDistance = getDistanceBetweenPoints(leftAnkle.position.x,rightAnkle.position.x,leftAnkle.position.y,rightAnkle.position.y)
             if(feetDistance <= shoulderDistance) {
@@ -309,7 +282,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         //Back should be between 90 - 40 degrees to the floor -> "Don't lean too far forward"
         //Get the back angle which is from the shoulder -> hip -> floor
         //Have to generate the floor angle myself, taking the x of the shoulder and the y of the hip
-        val leftHip = pose.getPoseLandmark(PoseLandmark.LEFT_HIP)
+
         if(leftShoulder != null && leftHip != null) {
             val backAngle =
                 getAngle(leftShoulder, leftHip, leftShoulder.position.x, leftHip.position.y)
@@ -326,8 +299,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         }
 
         //Knees should be the same or greater distance apart than the feet -> "Knees go forwards or out, never in"
-        val leftKnee = pose.getPoseLandmark(PoseLandmark.LEFT_KNEE)
-        val rightKnee = pose.getPoseLandmark(PoseLandmark.RIGHT_KNEE)
+
         var kneeDistance = 0f
         if(leftKnee != null && rightKnee != null && feetDistance != 0f){
             kneeDistance = getDistanceBetweenPoints(leftKnee.position.x,rightKnee.position.x,leftKnee.position.y,rightKnee.position.y)
