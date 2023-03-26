@@ -46,21 +46,17 @@ import kotlin.math.sqrt
 
 typealias LumaListener = (luma: Double) -> Unit
 
-class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
+class SquatFragment : Fragment(){
 
     private var TAG = "SquatFragment"
     private var _fragmentSquatBinding: FragmentSquatBinding? = null
     private val fragmentSquatBinding
         get() = _fragmentSquatBinding!!
 
-    private lateinit var objectDetectorHelper: ObjectDetectorHelper
     private lateinit var cameraExecutor: ExecutorService
-    private lateinit var bitmapBuffer: Bitmap
     private var preview: Preview? = null
-    private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
-    private var graphicOverlay : GraphicOverlay? = null
     private var timeRemaining : LocalTime? = null
     private var maxDepth : Float = 361f
     private var goodSquat : Float = 0f
@@ -81,13 +77,25 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     @SuppressLint("MissingPermission", "NewApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        objectDetectorHelper = ObjectDetectorHelper(
-            context = requireContext(),
-            objectDetectorListener = this)
-        graphicOverlay = fragmentSquatBinding.graphicOverlay
+        // Wait for the views to be properly laid out
+        fragmentSquatBinding.viewFinder.post {
+            // Set up the camera and its use cases
+            if(allPermissionsGranted()){
+                setUpCamera()
+            } else {
+                activity?.let {
+                    ActivityCompat.requestPermissions(
+                        it,
+                        REQUIRED_PERMISSIONS,
+                        REQUEST_CODE_PERMISSIONS
+                    )
+                }
+            }
+        }
         timeRemaining = LocalTime.now().plusSeconds(20)
         fragmentSquatBinding.buttonDashboard.visibility = View.INVISIBLE
         squatFeedback = HashMap<String, String>()
+        cameraExecutor = Executors.newSingleThreadExecutor()
         userID = requireArguments().getString("userID")!!
         maxDepth = 361f
         goodSquat = 0f
@@ -188,12 +196,6 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
     }
 
-    private fun detectObjects(image: ImageProxy) {
-        image.use { bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
-        val imageRotation = image.imageInfo.rotationDegrees
-        objectDetectorHelper.detect(bitmapBuffer, imageRotation)
-    }
-
     @RequiresApi(Build.VERSION_CODES.O)
     private fun processPose(pose: Pose, bitmap: Bitmap? = null){
         try{
@@ -208,8 +210,6 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
 
             val landmarkList = exerciseAnalysis.getJointLandmarks(pose)
-            val graphicOverlay = graphicOverlay!!
-            graphicOverlay.clear()
 
             //Get angles of each joint
             val LkneeAngle = ExerciseAnalysis.getAngle(landmarkList["left ankle"]!!,landmarkList["left knee"]!!,landmarkList["left hip"]!!)
@@ -268,8 +268,8 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         //The stance should be the same width or wider than the shoulders
         if(leftAnkle != null && rightAnkle != null && leftShoulder != null && rightShoulder != null) {
 
-            shoulderDistance = getDistanceBetweenPoints(leftShoulder.position.x,rightShoulder.position.x,leftShoulder.position.y,rightShoulder.position.y)
-            feetDistance = getDistanceBetweenPoints(leftAnkle.position.x,rightAnkle.position.x,leftAnkle.position.y,rightAnkle.position.y)
+            shoulderDistance = ExerciseAnalysis.getDistanceBetweenPoints(leftShoulder.position.x,rightShoulder.position.x,leftShoulder.position.y,rightShoulder.position.y)
+            feetDistance = ExerciseAnalysis.getDistanceBetweenPoints(leftAnkle.position.x,rightAnkle.position.x,leftAnkle.position.y,rightAnkle.position.y)
             if(feetDistance <= shoulderDistance) {
                 feedback.add("Wider Stance!")
                 squatFeedback.put(
@@ -285,7 +285,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
         if(leftShoulder != null && leftHip != null) {
             val backAngle =
-                getAngle(leftShoulder, leftHip, leftShoulder.position.x, leftHip.position.y)
+                ExerciseAnalysis.getAngle(leftShoulder, leftHip, leftShoulder.position.x, leftHip.position.y)
             if(backAngle <= 40) {
                 feedback.add("Lean Back!")
                 squatFeedback.put(
@@ -302,7 +302,7 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
         var kneeDistance = 0f
         if(leftKnee != null && rightKnee != null && feetDistance != 0f){
-            kneeDistance = getDistanceBetweenPoints(leftKnee.position.x,rightKnee.position.x,leftKnee.position.y,rightKnee.position.y)
+            kneeDistance = ExerciseAnalysis.getDistanceBetweenPoints(leftKnee.position.x,rightKnee.position.x,leftKnee.position.y,rightKnee.position.y)
             if(kneeDistance <= feetDistance) {
                 feedback.add("Knees out!")
                 squatFeedback.put(
@@ -333,42 +333,6 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             feedbacktext.text = message
         }
 
-    }
-
-    private fun checkSquat(kneeAngle: Double): Boolean {
-        return kneeAngle in 20.0..100.0
-    }
-
-    private fun getAngle(firstPoint: PoseLandmark, midPoint: PoseLandmark, lastPoint: PoseLandmark): Double {
-        var result = Math.toDegrees(
-            (atan2(lastPoint.position.y - midPoint.position.y,
-                lastPoint.position.x - midPoint.position.x)
-                    - atan2(firstPoint.position.y - midPoint.position.y,
-                firstPoint.position.x - midPoint.position.x)).toDouble()
-        )
-        result = Math.abs(result) // Angle should never be negative
-        if (result > 180) {
-            result = 360.0 - result // Always get the acute representation of the angle
-        }
-        return result
-    }
-
-    private fun getAngle(firstPoint: PoseLandmark, midPoint: PoseLandmark, lastX : Float, lastY : Float): Double {
-        var result = Math.toDegrees(
-            (atan2(lastY - midPoint.position.y,
-                lastX - midPoint.position.x)
-                    - atan2(firstPoint.position.y - midPoint.position.y,
-                firstPoint.position.x - midPoint.position.x)).toDouble()
-        )
-        result = Math.abs(result) // Angle should never be negative
-        if (result > 180) {
-            result = 360.0 - result // Always get the acute representation of the angle
-        }
-        return result
-    }
-
-    private fun getDistanceBetweenPoints(x1: Float, x2: Float, y1: Float, y2: Float) : Float {
-        return sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
@@ -409,70 +373,5 @@ class SquatFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             }
         }
     }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onInitialized() {
-        objectDetectorHelper.setupObjectDetector()
-        // Initialize our background executor
-        cameraExecutor = Executors.newSingleThreadExecutor()
-
-        // Wait for the views to be properly laid out
-        fragmentSquatBinding.viewFinder.post {
-            // Set up the camera and its use cases
-            if(allPermissionsGranted()){
-                setUpCamera()
-            } else {
-                activity?.let {
-                    ActivityCompat.requestPermissions(
-                        it,
-                        REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
-                }
-            }
-        }
-    }
-
-    override fun onError(error: String) {
-        activity?.runOnUiThread{
-            Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    override fun onResults(
-        results: MutableList<Detection>?,
-        inferenceTime: Long,
-        imageHeight: Int,
-        imageWidth: Int
-    ) {
-        activity?.runOnUiThread{
-                fragmentSquatBinding.overlay.setResults(
-                    results ?: LinkedList<Detection>(),
-                    imageHeight,
-                    imageWidth
-                )
-
-            fragmentSquatBinding.overlay.invalidate()
-        }
-    }
-
-    private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnalysis.Analyzer {
-
-        private fun ByteBuffer.toByteArray(): ByteArray {
-            rewind()    // Rewind the buffer to zero
-            val data = ByteArray(remaining())
-            get(data)   // Copy the buffer into a byte array
-            return data // Return the byte array
-        }
-
-        override fun analyze(image: ImageProxy) {
-
-            val buffer = image.planes[0].buffer
-            val data = buffer.toByteArray()
-            val pixels = data.map { it.toInt() and 0xFF }
-            val luma = pixels.average()
-
-            listener(luma)
-
-            image.close()
-        }
-    }
+    
 }
