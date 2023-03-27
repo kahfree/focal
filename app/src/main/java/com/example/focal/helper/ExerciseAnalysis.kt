@@ -12,20 +12,24 @@ class ExerciseAnalysis(var jointType: String, var exercise: String) {
         when(jointType){
             "knee" -> {
                 return hashMapOf(
-                    "left ankle" to pose.getPoseLandmark(PoseLandmark.LEFT_ANKLE),
-                    "right ankle" to pose.getPoseLandmark(PoseLandmark.RIGHT_ANKLE),
-                    "left knee" to pose.getPoseLandmark(PoseLandmark.LEFT_KNEE),
-                    "right knee" to pose.getPoseLandmark(PoseLandmark.RIGHT_KNEE),
-                    "left hip" to pose.getPoseLandmark(PoseLandmark.LEFT_HIP),
-                    "right hip" to pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
+                    "left hip" to pose.getPoseLandmark(PoseLandmark.LEFT_ANKLE),
+                    "right hip" to pose.getPoseLandmark(PoseLandmark.RIGHT_ANKLE),
+                    "left shoulder" to pose.getPoseLandmark(PoseLandmark.LEFT_KNEE),
+                    "right shoulder" to pose.getPoseLandmark(PoseLandmark.RIGHT_KNEE),
+                    "left elbow" to pose.getPoseLandmark(PoseLandmark.LEFT_HIP),
+                    "right elbow" to pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
                 )
             }
             "shoulder" -> {
                 return hashMapOf(
-                    "left ankle" to pose.getPoseLandmark(PoseLandmark.LEFT_ANKLE),
-                    "right ankle" to pose.getPoseLandmark(PoseLandmark.RIGHT_ANKLE),
+                    "left elbow" to pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW),
+                    "right elbow" to pose.getPoseLandmark(PoseLandmark.RIGHT_ELBOW),
                     "left shoulder" to pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER),
-                    "right shoulder" to pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER)
+                    "right shoulder" to pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER),
+                    "left wrist" to pose.getPoseLandmark(PoseLandmark.LEFT_WRIST),
+                    "right wrist" to pose.getPoseLandmark(PoseLandmark.RIGHT_WRIST),
+                    "left hip" to pose.getPoseLandmark(PoseLandmark.LEFT_HIP),
+                    "right hip" to pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
                 )
             }
             "elbow" -> {
@@ -58,10 +62,14 @@ class ExerciseAnalysis(var jointType: String, var exercise: String) {
             }
             "shoulder press" -> {
                 return hashMapOf(
-                    "left ankle" to pose.getPoseLandmark(PoseLandmark.LEFT_ANKLE),
-                    "right ankle" to pose.getPoseLandmark(PoseLandmark.RIGHT_ANKLE),
+                    "left elbow" to pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW),
+                    "right elbow" to pose.getPoseLandmark(PoseLandmark.RIGHT_ELBOW),
                     "left shoulder" to pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER),
-                    "right shoulder" to pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER)
+                    "right shoulder" to pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER),
+                    "left wrist" to pose.getPoseLandmark(PoseLandmark.LEFT_WRIST),
+                    "right wrist" to pose.getPoseLandmark(PoseLandmark.RIGHT_WRIST),
+                    "left hip" to pose.getPoseLandmark(PoseLandmark.LEFT_HIP),
+                    "right hip" to pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
                 )
             }
             "bicep curl" -> {
@@ -85,7 +93,7 @@ class ExerciseAnalysis(var jointType: String, var exercise: String) {
                 return jointAngle in 20.0..100.0
             }
             "shoulder press" -> {
-                return jointAngle in 20.0..100.0
+                return jointAngle in 45.0..180.0
             }
             "bicep curl" -> {
                 return jointAngle in 20.0..100.0

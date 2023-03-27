@@ -27,6 +27,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.focal.databinding.FragmentShoulderPressBinding
 import com.example.focal.databinding.FragmentSquatBinding
+import com.example.focal.helper.ExerciseAnalysis
 import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.pose.Pose
@@ -63,6 +64,7 @@ class ShoulderPressFragment : Fragment(){
     private var topOfMovementReached : Boolean = false
     private lateinit var squatFeedback : HashMap<String,String>
     private var userID : String = ""
+    private val exerciseAnalysis: ExerciseAnalysis = ExerciseAnalysis("shoulder","shoulder press")
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -198,16 +200,11 @@ class ShoulderPressFragment : Fragment(){
     private fun processPose(pose: Pose, bitmap: Bitmap? = null){
         try{
 
-            val leftHip = pose.getPoseLandmark(PoseLandmark.LEFT_HIP)
-            val rightHip = pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
-            val leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER)
-            val rightShoulder = pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER)
-            val leftElbow = pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW)
-            val rightElbow = pose.getPoseLandmark(PoseLandmark.RIGHT_ELBOW)
+            val jointLandmarks = exerciseAnalysis.getJointLandmarks(pose)
 
             //Get angles of each joint
-            val leftArmpitAngle = getAngle(leftElbow!!, leftShoulder!!, leftHip!!)
-            val rightArmpitAngle = getAngle(rightElbow!!, rightShoulder!!, rightHip!!)
+            val leftArmpitAngle = ExerciseAnalysis.getAngle(jointLandmarks["left elbow"]!!, jointLandmarks["left shoulder"]!!, jointLandmarks["left hip"]!!)
+            val rightArmpitAngle = ExerciseAnalysis.getAngle(jointLandmarks["right elbow"]!!, jointLandmarks["right shoulder"]!!, jointLandmarks["right hip"]!!)
 
             //Get average values between both joints
             val avgArmpitAngle = (leftArmpitAngle + rightArmpitAngle) / 2
@@ -223,8 +220,8 @@ class ShoulderPressFragment : Fragment(){
                 maxDepth = avgArmpitAngle.toFloat()
             }
             activity?.runOnUiThread {
-                if(checkShoulderPress(avgArmpitAngle)) {
-                    checkForm(pose)
+                if(exerciseAnalysis.checkExercise(avgArmpitAngle)) {
+                    checkForm(exerciseAnalysis.getFeedbackLandmarks(pose))
                     eyes_textview.setTextColor(Color.GREEN)
                 }
                 else {
@@ -240,27 +237,27 @@ class ShoulderPressFragment : Fragment(){
         }
     }
 
-    private fun checkForm(pose : Pose){
+    private fun checkForm(feedbackLandmarks : HashMap<String,PoseLandmark?>){
         val feedback : MutableList<String> = mutableListOf()
         //Check if feet are shoulder-width apart -> "Feet should be shoulder-width or slightly further apart"
         //Get the landmarks needed
-        val leftElbow = pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW)
-        val rightElbow = pose.getPoseLandmark(PoseLandmark.RIGHT_ELBOW)
-        val leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER)
-        val rightShoulder = pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER)
-        val leftWrist = pose.getPoseLandmark(PoseLandmark.LEFT_WRIST)
-        val rightWrist = pose.getPoseLandmark(PoseLandmark.RIGHT_WRIST)
-        val leftHip = pose.getPoseLandmark(PoseLandmark.LEFT_HIP)
-        val rightHip = pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
+        val leftElbow = feedbackLandmarks["left elbow"]
+        val rightElbow = feedbackLandmarks["right elbow"]
+        val leftShoulder = feedbackLandmarks["left shoulder"]
+        val rightShoulder = feedbackLandmarks["right shoulder"]
+        val leftWrist = feedbackLandmarks["left wrist"]
+        val rightWrist = feedbackLandmarks["right wrist"]
+        val leftHip = feedbackLandmarks["left hip"]
+        val rightHip = feedbackLandmarks["right hip"]
         var shoulderDistance = 0f
         var elbowDistance = 0f
         var wristDistance = 0f
 
         //The stance should be the same width or wider than the shoulders
         if(leftElbow != null && rightElbow != null && leftShoulder != null && rightShoulder != null && leftWrist != null && rightWrist != null) {
-            shoulderDistance = getDistanceBetweenPoints(leftShoulder.position.x,rightShoulder.position.x,leftShoulder.position.y,rightShoulder.position.y)
-            elbowDistance = getDistanceBetweenPoints(leftElbow.position.x,rightElbow.position.x,leftElbow.position.y,rightElbow.position.y)
-            wristDistance = getDistanceBetweenPoints(leftWrist.position.x,rightWrist.position.x,leftWrist.position.y,rightWrist.position.y)
+            shoulderDistance = ExerciseAnalysis.getDistanceBetweenPoints(leftShoulder.position.x,rightShoulder.position.x,leftShoulder.position.y,rightShoulder.position.y)
+            elbowDistance = ExerciseAnalysis.getDistanceBetweenPoints(leftElbow.position.x,rightElbow.position.x,leftElbow.position.y,rightElbow.position.y)
+            wristDistance = ExerciseAnalysis.getDistanceBetweenPoints(leftWrist.position.x,rightWrist.position.x,leftWrist.position.y,rightWrist.position.y)
             if(elbowDistance <= shoulderDistance) {
                 feedback.add("Elbows Out!")
                 squatFeedback.put(
@@ -276,9 +273,8 @@ class ShoulderPressFragment : Fragment(){
                 )
             }
 
-
-            val leftArmpitAngle = getAngle(leftElbow!!, leftShoulder!!, leftHip!!)
-            val rightArmpitAngle = getAngle(rightElbow!!, rightShoulder!!, rightHip!!)
+            val leftArmpitAngle = ExerciseAnalysis.getAngle(leftElbow!!, leftShoulder!!, leftHip!!)
+            val rightArmpitAngle = ExerciseAnalysis.getAngle(rightElbow!!, rightShoulder!!, rightHip!!)
 
             //Get average values between both joints
             val avgArmpitAngle = (leftArmpitAngle + rightArmpitAngle) / 2
@@ -318,42 +314,6 @@ class ShoulderPressFragment : Fragment(){
             feedbacktext.text = feedback.joinToString("\n")
         }
 
-    }
-
-    private fun checkShoulderPress(kneeAngle: Double): Boolean {
-        return kneeAngle in 45.0..180.0
-    }
-
-    private fun getAngle(firstPoint: PoseLandmark, midPoint: PoseLandmark, lastPoint: PoseLandmark): Double {
-        var result = Math.toDegrees(
-            (atan2(lastPoint.position.y - midPoint.position.y,
-                lastPoint.position.x - midPoint.position.x)
-                    - atan2(firstPoint.position.y - midPoint.position.y,
-                firstPoint.position.x - midPoint.position.x)).toDouble()
-        )
-        result = Math.abs(result) // Angle should never be negative
-        if (result > 180) {
-            result = 360.0 - result // Always get the acute representation of the angle
-        }
-        return result
-    }
-
-    private fun getAngle(firstPoint: PoseLandmark, midPoint: PoseLandmark, lastX : Float, lastY : Float): Double {
-        var result = Math.toDegrees(
-            (atan2(lastY - midPoint.position.y,
-                lastX - midPoint.position.x)
-                    - atan2(firstPoint.position.y - midPoint.position.y,
-                firstPoint.position.x - midPoint.position.x)).toDouble()
-        )
-        result = Math.abs(result) // Angle should never be negative
-        if (result > 180) {
-            result = 360.0 - result // Always get the acute representation of the angle
-        }
-        return result
-    }
-
-    private fun getDistanceBetweenPoints(x1: Float, x2: Float, y1: Float, y2: Float) : Float {
-        return sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
