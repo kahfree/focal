@@ -42,6 +42,15 @@ object FocalDB{
         return users
     }
 
+    fun getUserByID(userID : String, callback:(User?) -> Unit){
+        database.child("Users").child(userID).get().addOnSuccessListener {
+            val user = it.getValue(User::class.java)
+            Log.e("User",user.toString())
+            callback(user)
+        }.addOnFailureListener {
+            callback(null)
+        }
+    }
     fun addUser(newUser: User) {
         database.child("Users").child(newUser.userID!!).setValue(newUser).addOnSuccessListener {
             Log.e("Firebase", "User has been registered")

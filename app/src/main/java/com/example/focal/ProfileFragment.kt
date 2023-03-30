@@ -55,6 +55,12 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.e("ProfileViewCreated","In here")
+        FocalDB.getUserByID(userID){ u ->
+            if(u != null)
+                user = u
+            else
+                Log.e("User Profile","User object returned null")
+        }
         val userText = fragmentProfileBinding.textViewUserProfile
         val userAttempts = fragmentProfileBinding.textViewUserAttempts
         val FileService = FileService(requireActivity())
