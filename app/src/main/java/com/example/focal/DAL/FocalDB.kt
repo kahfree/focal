@@ -10,12 +10,40 @@ import kotlinx.coroutines.runBlocking
 object FocalDB{
     private val database : DatabaseReference = FirebaseDatabase.getInstance().getReference("")
 
-    fun readGoals(): List<Goal> {
-        return mutableListOf()
+    fun getGoals(userID :String, exercise: String, callback: (MutableList<Goal?>?) -> Unit){
+
+        database.child("Goals").child(userID).child(exercise).get().addOnSuccessListener {
+            val goals = mutableListOf<Goal?>()
+            it.children.forEach {
+                goals.add(it.getValue(Goal::class.java))
+                callback(goals)
+            }
+            goals.forEach {
+                Log.e("Get All Goals", it.toString())
+            }
+        }
     }
 
-    fun updateGoalProgress(newCurrent: Float) {
-
+    fun updateGoalProgress(userID: String, newCurrent: Float, goal : Goal, callback: (String?) -> Unit) {
+        val oldCurrent = goal.current
+        val updatedGoal: Goal = Goal(
+            goal.goalID,
+            goal.userID,
+            goal.exercise,
+            goal.goal,
+            newCurrent,
+            goal.deadline,
+            goal.title,
+            goal.status
+        )
+        Log.e("Goal to Update", updatedGoal.toString())
+        database.child("Goals")
+            .child(userID)
+            .child(goal.exercise!!)
+            .child(goal.title!!)
+            .setValue(updatedGoal).addOnSuccessListener {
+            callback("Updated ${goal.title} goal from $oldCurrent to $newCurrent")
+        }
     }
     fun updateGoalStatus(newStatus: String) {
 
@@ -100,8 +128,12 @@ object FocalDB{
 
     }
 
-    fun addAttempt(attempt: Attempt) {
-
+    fun addAttempt(userID: String, attempt: Attempt, timestamp: String,
+        callback: (String?) -> Unit) {
+        database.child("Attempts").child(userID)
+            .child(timestamp).setValue(attempt).addOnSuccessListener {
+                callback("Attempt of timestamp $timestamp has been logged")
+            }
     }
 
     fun getNumRowsAttempts(): Int {

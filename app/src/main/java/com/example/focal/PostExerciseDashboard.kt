@@ -50,8 +50,8 @@ class PostExerciseDashboard : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val FileService = FileService(requireActivity())
-        var feedbackToGive = requireArguments().getSerializable("feedbackToGive") as HashMap<String, String>
-        val userID = requireArguments().getString("userID")
+        val feedbackToGive = requireArguments().getSerializable("feedbackToGive") as HashMap<*, *>
+        val userID = requireArguments().getString("userID").toString()
         val exercise = requireArguments().getString("exercise")
         val statOne =  String.format("%.2f", requireArguments().getFloat("maxDepth"))
         val quality = String.format("%.2f", requireArguments().getFloat("exerciseQuality"))
@@ -65,93 +65,35 @@ class PostExerciseDashboard : Fragment() {
             fragmentDashboardBinding.textViewFeedback.text =
                 feedbackToGive.entries.joinToString("\n")
             var attemptText = ""
-//            for(attempt in FileService.getAttemptsByUserIDAndExercise(userID,exercise!!)){
-//
-//                attemptText += attempt.display() + "\n\n"
-//            }
-//            previousAttempts.text = attemptText
+
         }
 
-//        FileService.logGoals()
-//        val goalList = FileService.readGoals()
-        val databaseGoal = FirebaseDatabase.getInstance().getReference("Goals").child(userID.toString()).child(exercise!!)
-        databaseGoal.get().addOnSuccessListener {
-            it.children.forEach {
-                var goal: Goal = it.getValue(Goal::class.java)!!
-                Log.e("Goal updater","${it.key}")
-                if(it.key!! == "Max Depth"){
+        FocalDB.getGoals(userID, exercise!!){goals ->
+            goals?.forEach {
+                val goal: Goal = it!!
+                if(it.title == "Max Depth"){
                     Log.e("Goal updater","In the max depth thing")
-                    if (requireArguments().getFloat("maxDepth") <= goal?.current!!) {
-                        goal.current = requireArguments().getFloat("maxDepth")
-                        val updatedGoal: Goal = Goal(
-                            goal.goalID,
-                            goal.userID,
-                            goal.exercise,
-                            goal.goal,
-                            requireArguments().getFloat("maxDepth"),
-                            goal.deadline,
-                            goal.title,
-                            goal.status
-                        )
-                        Log.e("Goal to Update", updatedGoal.toString())
-                        databaseGoal.child("Max Depth").setValue(updatedGoal).addOnSuccessListener {
-                            Log.e("Goal Updated", "Updated max depth goal")
+                    if (requireArguments().getFloat("maxDepth") <= goal.current!!) {
+                        FocalDB.updateGoalProgress(userID, requireArguments().getFloat("maxDepth"),goal){
+                            Log.e("Updated Goal",it!!)
                         }
                     }
-                }else if (it.key!! == "Quality"){
+                }else if (it.title == "Quality"){
                     Log.e("Goal updater","In the quality thing")
-                    if (requireArguments().getFloat("exerciseQuality") >= goal?.current!!) {
-                        goal.current = requireArguments().getFloat("exerciseQuality")
-                        val updatedGoal: Goal = Goal(
-                            goal.goalID,
-                            goal.userID,
-                            goal.exercise,
-                            goal.goal,
-                            requireArguments().getFloat("exerciseQuality"),
-                            goal.deadline,
-                            goal.title,
-                            goal.status
-                        )
-                        Log.e("Goal to Update", updatedGoal.toString())
-                        databaseGoal.child("Quality").setValue(updatedGoal).addOnSuccessListener {
-                            Log.e("Goal Updated", "Updated exercise quality goal")
+                    if (requireArguments().getFloat("exerciseQuality") >= goal.current!!) {
+                        FocalDB.updateGoalProgress(userID, requireArguments().getFloat("maxDepth"),goal){
+                            Log.e("Updated Goal",it!!)
                         }
                     }
                 }
             }
         }
-//        if(goalList[0].current!! > requireArguments().getFloat("maxDepth")) {
-//            FileService.updateGoalProgress(requireArguments().getFloat("maxDepth"))
-//            if(requireArguments().getFloat("maxDepth") <= goalList[0].goal!!)
-//                FileService.updateGoalStatus("Complete")
-////            else if (LocalDate.now() >= LocalDate.parse(goalList[0].deadline))
-////                FileService.updateGoalStatus("Expired")
-//        }
+
         val attemptTimestamp = LocalDateTime.now().format(formatter)
-        val newAttempt = Attempt(exercise!!, statOne.toFloat(),quality.toFloat(),attemptFeedback)
-//        FileService.addAttempt(newAttempt)
-        database = FirebaseDatabase.getInstance().getReference("Attempts").child(userID.toString())
-        database.child(attemptTimestamp).setValue(newAttempt).addOnSuccessListener {
-            Log.e("Firebase", "Attempts have been logged")
+        val newAttempt = Attempt(exercise, statOne.toFloat(),quality.toFloat(),attemptFeedback)
+        
+        FocalDB.addAttempt(userID,newAttempt, attemptTimestamp){
+            Log.e("Add Attempt","$it")
         }
-    }
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment PostExerciseDashboard.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            PostExerciseDashboard().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
     }
 }
