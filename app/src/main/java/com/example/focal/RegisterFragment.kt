@@ -22,7 +22,6 @@ class RegisterFragment : Fragment() {
         get() = _fragmentRegisterBinding!!
 
     private var numUsers: Int = 0
-    private lateinit var database : DatabaseReference
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

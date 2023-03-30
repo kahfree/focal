@@ -44,8 +44,13 @@ class AddGoalFragment : Fragment() {
                 val title: String = binding.title.selectedItem.toString()
                 val goal: Float = binding.goal.text.toString().toFloat()
                 val deadline: String = binding.deadline.text.toString()
-                val newGoal: Goal = Goal("G3",userID,exercise,goal,0f,deadline,title,"Ongoing")
-                database.child(userID).child(exercise).child(title).setValue(newGoal)
+                var current = if(title.toString() == "Max Depth")
+                    180f
+                else
+                    0f
+                val newGoal: Goal = Goal("G3",userID,exercise,goal,current,deadline,title,"Ongoing")
+//                database.child(userID).child(exercise).child(title).setValue(newGoal)
+                FocalDB.addGoal(newGoal){ Log.e("Add Goal","Goal has been added successfully")}
                 putString("userID", userID)
             })
             Toast.makeText(requireContext(),"Goal has been added!",Toast.LENGTH_SHORT).show()

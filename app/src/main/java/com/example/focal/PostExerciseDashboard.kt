@@ -63,7 +63,7 @@ class PostExerciseDashboard : Fragment() {
             }
         }
 
-        FocalDB.getGoals(userID, exercise!!){goals ->
+        FocalDB.getGoalsByExercise(userID, exercise!!){goals ->
             goals?.forEach {
                 val goal: Goal = it!!
                 if(it.title == "Max Depth"){

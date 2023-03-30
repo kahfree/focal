@@ -16,9 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 
-/**
- * A simple [Fragment] subclass as the second destination in the navigation.
- */
+
 class GoalFragment : Fragment() {
 
     private var _binding: FragmentGoalBinding? = null
@@ -26,45 +24,25 @@ class GoalFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-    private var goalList : MutableList<Goal> = mutableListOf()
-    private lateinit var database : DatabaseReference
+    private var goalList : MutableList<Goal?> = mutableListOf()
     private lateinit var userID: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         userID = requireArguments().getString("userID")!!
 
-
-        database = FirebaseDatabase.getInstance().getReference("Goals")
-        database.child(userID).get().addOnSuccessListener {
-            it.children.forEach {
-                it.children.forEach {
-                    val goal = it.getValue(Goal::class.java)
-                    Log.e("Goal converted", goal.toString())
-                    goalList.add(goal!!)
-                }
-            }
+        FocalDB.getGoalsByUserID(userID){goals ->
+            if(goals != null)
+                goalList = goals
         }
     }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentGoalBinding.inflate(inflater, container, false)
         return binding.root
-//        // Inflate the layout for this fragment
-//        val view = inflater.inflate(R.layout.fragment_goal, container, false)
-//
-//        // Get a reference to the LinearLayout
-//
-//        // Create a new Button
-//        val button = Button(requireContext())
-//        button.text = "Button added programmatically"
-//
-//        // Add the Button to the LinearLayout
-//        view.addView(button)
-//
-//        return view
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -88,11 +66,10 @@ class GoalFragment : Fragment() {
 
             for(goal in goalList){
                 Log.e("Goal Fragment",binding.goalContainer.id.toString())
-                trans.add(binding.goalContainer.id,GoalTemplateFragment(goal))
+                trans.add(binding.goalContainer.id,GoalTemplateFragment(goal!!))
                 trans.addToBackStack(null)
             }
             trans.commit()
-
         }.invoke()
         }
     }

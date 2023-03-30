@@ -10,7 +10,7 @@ import kotlinx.coroutines.runBlocking
 object FocalDB{
     private val database : DatabaseReference = FirebaseDatabase.getInstance().getReference("")
 
-    fun getGoals(userID :String, exercise: String, callback: (MutableList<Goal?>?) -> Unit){
+    fun getGoalsByExercise(userID :String, exercise: String, callback: (MutableList<Goal?>?) -> Unit){
 
         database.child("Goals").child(userID).child(exercise).get().addOnSuccessListener {
             val goals = mutableListOf<Goal?>()
@@ -21,6 +21,33 @@ object FocalDB{
             goals.forEach {
                 Log.e("Get All Goals", it.toString())
             }
+        }
+    }
+
+    fun getGoalsByUserID(userID :String, callback: (MutableList<Goal?>?) -> Unit){
+        val goals = mutableListOf<Goal?>()
+        database.child("Goals").child(userID).get().addOnSuccessListener {
+            it.children.forEach {
+                it.children.forEach {
+                    goals.add(it.getValue(Goal::class.java))
+                }
+            }
+            goals.forEach {
+                Log.e("Get All Goals", it.toString())
+            }
+            callback(goals)
+        }
+    }
+
+    fun removeGoal(goal: Goal, callback: (String?) -> Unit){
+        database.child("Goals").child(goal.userID.toString()).child(goal.exercise.toString()).child(goal.title.toString()).removeValue().addOnSuccessListener {
+            callback("Goal has been successfully removed")
+        }
+    }
+
+    fun addGoal(goal: Goal, callback: (String?) -> Unit){
+        database.child("Goals").child(goal.userID.toString()).child(goal.exercise.toString()).child(goal.title.toString()).setValue(goal).addOnSuccessListener {
+            callback("Goal has been added successfully")
         }
     }
 

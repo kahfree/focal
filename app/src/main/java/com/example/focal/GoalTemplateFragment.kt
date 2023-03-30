@@ -31,19 +31,6 @@ class GoalTemplateFragment(goal: Goal) : Fragment() {
     ): View? {
         _binding = FragmentGoalTemplateBinding.inflate(inflater, container, false)
         return binding.root
-//        // Inflate the layout for this fragment
-//        val view = inflater.inflate(R.layout.fragment_goal, container, false)
-//
-//        // Get a reference to the LinearLayout
-//
-//        // Create a new Button
-//        val button = Button(requireContext())
-//        button.text = "Button added programmatically"
-//
-//        // Add the Button to the LinearLayout
-//        view.addView(button)
-//
-//        return view
 
     }
 
@@ -51,17 +38,13 @@ class GoalTemplateFragment(goal: Goal) : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.complete.setOnClickListener {
-            FirebaseDatabase.getInstance().getReference("Goals").child(goal1.userID.toString()).child(goal1.exercise.toString()).child(goal1.title.toString()).removeValue()
-
-                findNavController().navigate(R.id.action_GoalFragment_to_HomeFragment, Bundle().apply {
-                    putString("userID", goal1.userID)
-                })
-                Toast.makeText(requireContext(),"Goal has been completed!",Toast.LENGTH_SHORT).show()
-
+            FocalDB.removeGoal(goal1){ Log.e("Remove Goal","$it")}
+            findNavController().navigate(R.id.action_GoalFragment_to_HomeFragment, Bundle().apply {
+                putString("userID", goal1.userID)
+            })
+            Toast.makeText(requireContext(),"Goal has been completed!",Toast.LENGTH_SHORT).show()
         }
 
-//        val goalList = FileService(requireActivity()).readGoals()
-//        FileService(requireActivity()).logGoals()
         Log.e("Goal Template",goal1.toString())
         val pb = binding.progressBarGoal
         var progress = 0
