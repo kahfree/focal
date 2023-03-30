@@ -29,12 +29,14 @@ class RegisterFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         _fragmentRegisterBinding = FragmentRegisterBinding.inflate(inflater, container, false)
-        database = FirebaseDatabase.getInstance().getReference("Users")
-        database.get().addOnSuccessListener { numUsers = it.children.count() }
-//        runBlocking {
-//            numUsers = FocalDB.getNumUsers()
-//            delay(500)
-//        }
+//        database = FirebaseDatabase.getInstance().getReference("Users")
+//        database.get().addOnSuccessListener { numUsers = it.children.count() }
+        FocalDB.getNumUsers {size ->
+            if(size != null)
+                numUsers = size
+            else
+                Log.e("Register","Unable to get count of users")
+        }
 
         return fragmentRegisterBinding.root
     }

@@ -21,7 +21,7 @@ class ProfileFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val fragmentProfileBinding get() = _fragmentProfileBinding!!
-    private var attemptList : MutableList<Attempt> = mutableListOf()
+    private var attemptList : MutableList<Attempt?> = mutableListOf()
     private var user : User? = null
     private lateinit var userID: String
 
@@ -29,24 +29,25 @@ class ProfileFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         userID = requireArguments().getString("userID")!!
-        FirebaseDatabase.getInstance().getReference("Users").child(userID).get().addOnSuccessListener {
-            user = it.getValue(User::class.java)
-        }
 
-        database = FirebaseDatabase.getInstance().getReference("Attempts")
-        database.child(userID).get().addOnSuccessListener {
-            it.children.forEach {
-                    val attempt = it.getValue(Attempt::class.java)
-                    Log.e("Attempt converted", attempt.toString())
-                    attemptList.add(attempt!!)
-            }
+        FocalDB.getUserByID(userID){ u ->
+            if(u != null)
+                user = u
+            else
+                Log.e("User Profile","User object returned null")
+        }
+        FocalDB.getAttempts(userID){attempts ->
+            if(attempts != null)
+                attemptList = attempts
+            else
+                Log.e("User Profile","Failed to get attempts")
         }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _fragmentProfileBinding = FragmentProfileBinding.inflate(inflater, container, false)
         return fragmentProfileBinding.root
@@ -55,18 +56,9 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.e("ProfileViewCreated","In here")
-        FocalDB.getUserByID(userID){ u ->
-            if(u != null)
-                user = u
-            else
-                Log.e("User Profile","User object returned null")
-        }
         val userText = fragmentProfileBinding.textViewUserProfile
         val userAttempts = fragmentProfileBinding.textViewUserAttempts
         val FileService = FileService(requireActivity())
-//        val user = FileService.getUserByID(userID)
-//        val attempts = FileService.getAttemptsByUserID(userID).map { it -> it.display() }.joinToString("\n\n")
-
 
         Log.e("UI Thread","Inside the UI thread")
         GlobalScope.launch {
@@ -77,7 +69,7 @@ class ProfileFragment : Fragment() {
             Log.e("User", user.toString())
             requireActivity().runOnUiThread {
             userText.text = user.toString()
-            userAttempts.text = attemptList.map { it -> it.display() }.joinToString("\n\n")
+            userAttempts.text = attemptList.map { it -> it?.display() }.joinToString("\n\n")
             }
         }
 

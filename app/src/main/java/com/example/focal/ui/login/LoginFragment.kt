@@ -56,8 +56,12 @@ class LoginFragment : Fragment() {
         val loginButton = binding.login
         val loadingProgressBar = binding.loading
 
-        listOfUsers =  FocalDB.getUsers()
-
+        FocalDB.getUsers { users ->
+            if(users != null)
+                listOfUsers = users
+            else
+                Log.e("Login","Failed to get list of users")
+        }
         loginButton.setOnClickListener {
             loadingProgressBar.visibility = View.VISIBLE
             if(login())

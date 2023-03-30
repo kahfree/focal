@@ -29,17 +29,18 @@ object FocalDB{
 
     }
 
-    fun getUsers(): MutableList<User?> {
-        var users = mutableListOf<User?>()
+    fun getUsers(callback: (MutableList<User?>?) -> Unit){
+
         database.child("Users").get().addOnSuccessListener {
+            val users = mutableListOf<User?>()
             it.children.forEach {
                 users.add(it.getValue(User::class.java))
+                callback(users)
             }
             users.forEach {
                 Log.e("UserList", it.toString())
             }
         }
-        return users
     }
 
     fun getUserByID(userID : String, callback:(User?) -> Unit){
@@ -65,15 +66,23 @@ object FocalDB{
 
     }
 
-    fun getNumUsers(): Int {
-        return getUsers().size
+    fun getNumUsers(callback: (Int?) -> Unit) {
+        getUsers(){users->
+            callback(users?.size)
+        }
     }
 
     @SuppressLint("NewApi")
-    fun getAttempts(): List<Attempt> {
-        return mutableListOf()
+    fun getAttempts(userID: String, callback: (MutableList<Attempt?>?) -> Unit) {
+        database.child("Attempts").child(userID).get().addOnSuccessListener {
+            var attempts = mutableListOf<Attempt?>()
+            it.children.forEach {
+                attempts.add(it.getValue(Attempt::class.java))
+            }
+            callback(attempts)
+        }
     }
-    @SuppressLint("NewApi")
+
     fun getAttemptsByUserID(userID: Int): List<Attempt> {
         return mutableListOf()
     }
