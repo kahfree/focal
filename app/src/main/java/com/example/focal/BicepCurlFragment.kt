@@ -28,6 +28,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.focal.databinding.FragmentBicepCurl2Binding
 import com.example.focal.databinding.FragmentShoulderPressBinding
 import com.example.focal.databinding.FragmentSquatBinding
+import com.example.focal.helper.ExerciseAnalysis
 import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.pose.Pose
@@ -63,7 +64,9 @@ class BicepCurlFragment : Fragment(){
     private var badCurl : Float = 0f
     private var topOfMovementReached : Boolean = false
     private lateinit var curlFeedback : HashMap<String,String>
-    private var userID : Int = 0
+    private var userID : String = ""
+    private val exerciseAnalysis: ExerciseAnalysis = ExerciseAnalysis("elbow","bicep curl")
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -95,7 +98,7 @@ class BicepCurlFragment : Fragment(){
         curlFeedback = HashMap<String, String>()
         // Initialize our background executor
         cameraExecutor = Executors.newSingleThreadExecutor()
-        userID = requireArguments().getInt("userID")
+        userID = requireArguments().getString("userID").toString()
         rangeOfMotion = 361f
         goodCurl = 0f
         badCurl = 0f
@@ -135,7 +138,7 @@ class BicepCurlFragment : Fragment(){
 
         val analysisUseCase = ImageAnalysis.Builder().build()
 
-        analysisUseCase?.setAnalyzer(
+        analysisUseCase.setAnalyzer(
             cameraExecutor,
 
             ImageAnalysis.Analyzer { image: ImageProxy ->
@@ -143,8 +146,7 @@ class BicepCurlFragment : Fragment(){
                     // If the time is up display the post-exercise dashboard
                     if(LocalTime.now().isAfter(timeRemaining)) {
                         postExerciseDashboard()
-                    }
-                    else {
+                    } else {
                         // Convert the image from a CameraX 'ImageProxy' to an Google 'InputImage'
                         val imageToUse = InputImage.fromMediaImage(
                             image.image!!,
@@ -188,7 +190,7 @@ class BicepCurlFragment : Fragment(){
                 putString("exercise", "Bicep Curl")
                 putFloat("exerciseQuality", quality)
                 putSerializable("feedbackToGive",curlFeedback)
-                putInt("userID", userID)
+                putString("userID", userID)
             })
         }
 
@@ -199,16 +201,11 @@ class BicepCurlFragment : Fragment(){
     private fun processPose(pose: Pose, bitmap: Bitmap? = null){
         try{
 
-            val leftWrist = pose.getPoseLandmark(PoseLandmark.LEFT_WRIST)
-            val rightWrist = pose.getPoseLandmark(PoseLandmark.RIGHT_WRIST)
-            val leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER)
-            val rightShoulder = pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER)
-            val leftElbow = pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW)
-            val rightElbow = pose.getPoseLandmark(PoseLandmark.RIGHT_ELBOW)
+            val jointLandmarks = exerciseAnalysis.getJointLandmarks(pose)
 
             //Get angles of each joint
-            val leftElbowAngle = getAngle(leftShoulder!!, leftElbow!!, leftWrist!!)
-            val rightElbowAngle = getAngle(rightShoulder!!, rightElbow!!, rightWrist!!)
+            val leftElbowAngle = ExerciseAnalysis.getAngle(jointLandmarks["left shoulder"]!!, jointLandmarks["left elbow"]!!, jointLandmarks["left wrist"]!!)
+            val rightElbowAngle = ExerciseAnalysis.getAngle(jointLandmarks["right shoulder"]!!, jointLandmarks["right elbow"]!!, jointLandmarks["right wrist"]!!)
             //Get average values between both joints
             val avgElbowAngle = (leftElbowAngle + rightElbowAngle) / 2
 
@@ -219,8 +216,8 @@ class BicepCurlFragment : Fragment(){
             elbowAngle_textview.setTextColor(Color.GREEN)
             //Print new values onto labels
             activity?.runOnUiThread {
-                if(checkBicepCurl(avgElbowAngle)) {
-                    checkForm(pose)
+                if(exerciseAnalysis.checkExercise(avgElbowAngle)) {
+                    checkForm(exerciseAnalysis.getFeedbackLandmarks(pose))
                     elbowAngle_textview.setTextColor(Color.GREEN)
                 }
                 else {
@@ -236,21 +233,15 @@ class BicepCurlFragment : Fragment(){
         }
     }
 
-    private fun checkForm(pose : Pose){
+    private fun checkForm(feedbackLandmarks : HashMap<String,PoseLandmark?>){
         val feedback : MutableList<String> = mutableListOf()
-        //Check if feet are shoulder-width apart -> "Feet should be shoulder-width or slightly further apart"
         //Get the landmarks needed
-        val leftElbow = pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW)
-        val rightElbow = pose.getPoseLandmark(PoseLandmark.RIGHT_ELBOW)
-        val leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER)
-        val rightShoulder = pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER)
-        val leftWrist = pose.getPoseLandmark(PoseLandmark.LEFT_WRIST)
-        val rightWrist = pose.getPoseLandmark(PoseLandmark.RIGHT_WRIST)
-        val leftHip = pose.getPoseLandmark(PoseLandmark.LEFT_HIP)
-        val rightHip = pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
-        var shoulderDistance = 0f
-        var elbowDistance = 0f
-        var wristDistance = 0f
+        val leftElbow = feedbackLandmarks["left elbow"]
+        val rightElbow = feedbackLandmarks["right elbow"]
+        val leftShoulder = feedbackLandmarks["left shoulder"]
+        val rightShoulder = feedbackLandmarks["right shoulder"]
+        val leftHip = feedbackLandmarks["left hip"]
+        val rightHip = feedbackLandmarks["right hip"]
 
         //The stance should be the same width or wider than the shoulders
         if(leftElbow != null && rightElbow != null && leftShoulder != null && rightShoulder != null && leftHip != null && rightHip != null) {
@@ -293,42 +284,6 @@ class BicepCurlFragment : Fragment(){
             feedbacktext.text = feedback.joinToString("\n")
         }
 
-    }
-
-    private fun checkBicepCurl(elbowAngle: Double): Boolean {
-        return elbowAngle in 20.0..170.0
-    }
-
-    private fun getAngle(firstPoint: PoseLandmark, midPoint: PoseLandmark, lastPoint: PoseLandmark): Double {
-        var result = Math.toDegrees(
-            (atan2(lastPoint.position.y - midPoint.position.y,
-                lastPoint.position.x - midPoint.position.x)
-                    - atan2(firstPoint.position.y - midPoint.position.y,
-                firstPoint.position.x - midPoint.position.x)).toDouble()
-        )
-        result = Math.abs(result) // Angle should never be negative
-        if (result > 180) {
-            result = 360.0 - result // Always get the acute representation of the angle
-        }
-        return result
-    }
-
-    private fun getAngle(firstPoint: PoseLandmark, midPoint: PoseLandmark, lastX : Float, lastY : Float): Double {
-        var result = Math.toDegrees(
-            (atan2(lastY - midPoint.position.y,
-                lastX - midPoint.position.x)
-                    - atan2(firstPoint.position.y - midPoint.position.y,
-                firstPoint.position.x - midPoint.position.x)).toDouble()
-        )
-        result = Math.abs(result) // Angle should never be negative
-        if (result > 180) {
-            result = 360.0 - result // Always get the acute representation of the angle
-        }
-        return result
-    }
-
-    private fun getDistanceBetweenPoints(x1: Float, x2: Float, y1: Float, y2: Float) : Float {
-        return sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
