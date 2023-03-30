@@ -17,16 +17,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [PostExerciseDashboard.newInstance] factory method to
- * create an instance of this fragment.
- */
 class PostExerciseDashboard : Fragment() {
     private var TAG = "PostExerciseDashboardFragment"
     private var _fragmentDashboardBinding: FragmentPostExerciseDashboardBinding? = null
@@ -49,7 +40,6 @@ class PostExerciseDashboard : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val FileService = FileService(requireActivity())
         val feedbackToGive = requireArguments().getSerializable("feedbackToGive") as HashMap<*, *>
         val userID = requireArguments().getString("userID").toString()
         val exercise = requireArguments().getString("exercise")
@@ -57,6 +47,7 @@ class PostExerciseDashboard : Fragment() {
         val quality = String.format("%.2f", requireArguments().getFloat("exerciseQuality"))
         val attemptFeedback = feedbackToGive.keys.joinToString(",")
         val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
+        var attemptText = ""
 
         val previousAttempts = fragmentDashboardBinding.textViewPreviousAttempts
         activity?.runOnUiThread {
@@ -64,8 +55,12 @@ class PostExerciseDashboard : Fragment() {
             fragmentDashboardBinding.textViewExerciseQuality.text = quality + "%"
             fragmentDashboardBinding.textViewFeedback.text =
                 feedbackToGive.entries.joinToString("\n")
-            var attemptText = ""
-
+            FocalDB.getAttempts(userID){attempts ->
+                if(attempts != null)
+                    fragmentDashboardBinding.textViewPreviousAttempts.text = attempts.map { it -> it?.display() }.joinToString("\n\n")
+                else
+                    Log.e("User Profile","Failed to get attempts")
+            }
         }
 
         FocalDB.getGoals(userID, exercise!!){goals ->
@@ -91,9 +86,10 @@ class PostExerciseDashboard : Fragment() {
 
         val attemptTimestamp = LocalDateTime.now().format(formatter)
         val newAttempt = Attempt(exercise, statOne.toFloat(),quality.toFloat(),attemptFeedback)
-        
+
         FocalDB.addAttempt(userID,newAttempt, attemptTimestamp){
             Log.e("Add Attempt","$it")
         }
     }
+
 }
