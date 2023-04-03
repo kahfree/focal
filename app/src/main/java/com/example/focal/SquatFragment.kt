@@ -46,8 +46,6 @@ import java.time.LocalTime
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
-typealias LumaListener = (luma: Double) -> Unit
-
 class SquatFragment : Fragment(){
 
     private var TAG = "SquatFragment"
@@ -71,7 +69,7 @@ class SquatFragment : Fragment(){
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _fragmentSquatBinding = FragmentSquatBinding.inflate(inflater, container, false)
         return fragmentSquatBinding.root
     }
@@ -130,12 +128,14 @@ class SquatFragment : Fragment(){
             .setTargetRotation(fragmentSquatBinding.viewFinder.display.rotation)
             .build()
 
-        val poseOptions = PoseDetectorOptions.Builder().setDetectorMode(PoseDetectorOptions.STREAM_MODE).build()
+        val poseOptions = PoseDetectorOptions.Builder()
+            .setDetectorMode(PoseDetectorOptions.STREAM_MODE)
+            .build()
         val poseDetector = PoseDetection.getClient(poseOptions)
 
         val analysisUseCase = ImageAnalysis.Builder().build()
 
-        analysisUseCase?.setAnalyzer(
+        analysisUseCase.setAnalyzer(
             cameraExecutor,
 
             ImageAnalysis.Analyzer { image: ImageProxy ->
@@ -143,8 +143,7 @@ class SquatFragment : Fragment(){
                     // If the time is up display the post-exercise dashboard
                     if(LocalTime.now().isAfter(timeRemaining)) {
                         postExerciseDashboard()
-                    }
-                    else {
+                    } else {
                         // Convert the image from a CameraX 'ImageProxy' to an Google 'InputImage'
                         val imageToUse = InputImage.fromMediaImage(
                             image.image!!,
@@ -153,7 +152,7 @@ class SquatFragment : Fragment(){
 
                         // Run inference on the input image and analyze the frame for feedback
                         poseDetector.process(imageToUse).continueWith { task ->
-                            val pose = task.getResult()
+                            val pose = task.result
                             processPose(pose!!)
                         }.addOnCompleteListener {
                             // Close the CameraX image so another can be inputted and prevent hanging
@@ -201,37 +200,28 @@ class SquatFragment : Fragment(){
     @RequiresApi(Build.VERSION_CODES.O)
     private fun processPose(pose: Pose, bitmap: Bitmap? = null){
         try{
-//            val leftHip = pose.getPoseLandmark(PoseLandmark.LEFT_HIP)
-//            val rightHip = pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
-//
-//            val leftKnee = pose.getPoseLandmark(PoseLandmark.LEFT_KNEE)
-//            val rightKnee = pose.getPoseLandmark(PoseLandmark.RIGHT_KNEE)
-//
-//            val leftAnkle = pose.getPoseLandmark(PoseLandmark.LEFT_ANKLE)
-//            val rightAnkle = pose.getPoseLandmark(PoseLandmark.RIGHT_ANKLE)
-
 
             val landmarkList = exerciseAnalysis.getJointLandmarks(pose)
 
             //Get angles of each joint
             val LkneeAngle = ExerciseAnalysis.getAngle(landmarkList["left ankle"]!!,landmarkList["left knee"]!!,landmarkList["left hip"]!!)
             val RkneeAngle = ExerciseAnalysis.getAngle(landmarkList["right ankle"]!!,landmarkList["right knee"]!!,landmarkList["right hip"]!!)
-//            val leftKneeAngle = getAngle(leftAnkle!!, leftKnee!!, leftHip!!)
-//            val rightKneeAngle = getAngle(rightAnkle!!, rightKnee!!, rightHip!!)
 
-            //Get average values between both joints
             val avgKneeAngle = (LkneeAngle + RkneeAngle) / 2
 
             //Get textview's for labels
             val eyes_textview = fragmentSquatBinding.textEyesValue
             val timer_textview = fragmentSquatBinding.textTimerValue
-            val remaining_time = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                Duration.between(LocalTime.now(),timeRemaining).toSecondsPart()
-            } else null
+            val remaining_time = Duration.between(LocalTime.now(),timeRemaining).toSecondsPart()
+
             eyes_textview.setTextColor(Color.GREEN)
             //Print new values onto labels
-            if(avgKneeAngle < maxDepth)
+            if(avgKneeAngle < maxDepth){
+                Log.e("Max Depth", "Recording new max depth from $maxDepth to $avgKneeAngle")
                 maxDepth = avgKneeAngle.toFloat()
+            }
+
+
             activity?.runOnUiThread {
                 if(exerciseAnalysis.checkExercise(avgKneeAngle)) {
                     checkForm(exerciseAnalysis.getFeedbackLandmarks(pose))
@@ -245,11 +235,12 @@ class SquatFragment : Fragment(){
                 timer_textview.text = remaining_time.toString() + "s"
             }
         }catch (e: Exception) {
-            Toast.makeText(
-                activity?.baseContext,
-                "Pose Landmarks failed.",
-                Toast.LENGTH_SHORT).show()
-            Log.d(TAG, e.localizedMessage)
+//            Toast.makeText(
+//                activity?.baseContext,
+//                "Pose Landmarks failed.",
+//                Toast.LENGTH_SHORT).show()
+            Log.e(TAG, "Error in process pose method")
+            Log.d(TAG, e.message!!)
         }
     }
 

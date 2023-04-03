@@ -53,9 +53,7 @@ class GoalFragment : Fragment() {
                 putString("userID", userID)
             })
         }
-        val fileService = FileService(requireActivity())
         val userID = requireArguments().getString("userID")!!
-        val goals = fileService.getGoalsByUserID(userID)
         val fragManager = parentFragmentManager
         val trans = fragManager.beginTransaction()
         var index= 0

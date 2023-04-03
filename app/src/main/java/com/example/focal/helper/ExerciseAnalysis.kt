@@ -14,12 +14,12 @@ class ExerciseAnalysis(var jointType: Joints, var exercise: Exercises) {
         when(jointType){
             Joints.KNEE -> {
                 return hashMapOf(
-                    "left hip" to pose.getPoseLandmark(PoseLandmark.LEFT_ANKLE),
-                    "right hip" to pose.getPoseLandmark(PoseLandmark.RIGHT_ANKLE),
-                    "left shoulder" to pose.getPoseLandmark(PoseLandmark.LEFT_KNEE),
-                    "right shoulder" to pose.getPoseLandmark(PoseLandmark.RIGHT_KNEE),
-                    "left elbow" to pose.getPoseLandmark(PoseLandmark.LEFT_HIP),
-                    "right elbow" to pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
+                    "left ankle" to pose.getPoseLandmark(PoseLandmark.LEFT_ANKLE),
+                    "right ankle" to pose.getPoseLandmark(PoseLandmark.RIGHT_ANKLE),
+                    "left knee" to pose.getPoseLandmark(PoseLandmark.LEFT_KNEE),
+                    "right knee" to pose.getPoseLandmark(PoseLandmark.RIGHT_KNEE),
+                    "left hip" to pose.getPoseLandmark(PoseLandmark.LEFT_HIP),
+                    "right hip" to pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
                 )
             }
             Joints.SHOULDER -> {
@@ -112,7 +112,7 @@ class ExerciseAnalysis(var jointType: Joints, var exercise: Exercises) {
     companion object {
         @JvmStatic
         fun getDistanceBetweenPoints(x1: Float, x2: Float, y1: Float, y2: Float): Float {
-            return sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
+            return sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1))
         }
         @JvmStatic
         fun getAngle(firstPoint: PoseLandmark, midPoint: PoseLandmark, lastPoint: PoseLandmark): Double {

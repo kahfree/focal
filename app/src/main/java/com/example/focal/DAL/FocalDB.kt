@@ -122,7 +122,7 @@ object FocalDB{
     }
 
     fun getNumUsers(callback: (Int?) -> Unit) {
-        getUsers(){users->
+        getUsers { users->
             callback(users?.size)
         }
     }

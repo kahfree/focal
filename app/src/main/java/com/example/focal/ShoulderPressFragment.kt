@@ -283,8 +283,8 @@ class ShoulderPressFragment : Fragment(){
                 )
             }
 
-            val leftArmpitAngle = ExerciseAnalysis.getAngle(leftElbow!!, leftShoulder!!, leftHip!!)
-            val rightArmpitAngle = ExerciseAnalysis.getAngle(rightElbow!!, rightShoulder!!, rightHip!!)
+            val leftArmpitAngle = ExerciseAnalysis.getAngle(leftElbow, leftShoulder, leftHip!!)
+            val rightArmpitAngle = ExerciseAnalysis.getAngle(rightElbow, rightShoulder, rightHip!!)
 
             //Get average values between both joints
             val avgArmpitAngle = (leftArmpitAngle + rightArmpitAngle) / 2

@@ -24,7 +24,6 @@ import kotlinx.coroutines.runBlocking
 
 class LoginFragment : Fragment() {
 
-    private lateinit var loginViewModel: LoginViewModel
     private var _binding: FragmentLoginBinding? = null
 
     private lateinit var userToLogin : User
@@ -47,8 +46,6 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loginViewModel = ViewModelProvider(this, LoginViewModelFactory())
-            .get(LoginViewModel::class.java)
 
         (activity as AppCompatActivity).actionBar?.title = "Login"
         val usernameEditText = binding.username
@@ -74,13 +71,6 @@ class LoginFragment : Fragment() {
         binding.buttonRegister.setOnClickListener {
             findNavController().navigate(R.id.action_LoginFragment_to_RegisterFragment)
         }
-
-        FileService(requireActivity()).resetGoals()
-        FileService(requireActivity()).logGoals()
-        FileService(requireActivity()).resetUsers()
-        FileService(requireActivity()).logUsers()
-        FileService(requireActivity()).resetAttempts()
-        FileService(requireActivity()).logAttempts()
 
     }
 

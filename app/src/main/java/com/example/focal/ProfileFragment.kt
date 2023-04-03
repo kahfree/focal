@@ -58,7 +58,6 @@ class ProfileFragment : Fragment() {
         Log.e("ProfileViewCreated","In here")
         val userText = fragmentProfileBinding.textViewUserProfile
         val userAttempts = fragmentProfileBinding.textViewUserAttempts
-        val FileService = FileService(requireActivity())
 
         Log.e("UI Thread","Inside the UI thread")
         GlobalScope.launch {
