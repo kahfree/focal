@@ -72,7 +72,7 @@ class ShoulderPressFragment : Fragment(){
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _fragmentShoulderPressBinding = FragmentShoulderPressBinding.inflate(inflater, container, false)
         return fragmentShoulderPressBinding.root
     }
@@ -133,12 +133,20 @@ class ShoulderPressFragment : Fragment(){
             .setTargetRotation(fragmentShoulderPressBinding.viewFinder.display.rotation)
             .build()
 
-        val poseOptions = PoseDetectorOptions.Builder().setDetectorMode(PoseDetectorOptions.STREAM_MODE).build()
+        /* POTENTIAL SOLUTIONS FOR SLOW STARTUP
+            1. SET PERFORMANCE MODE TO QUICK INSTEAD OF ACCURATE
+            2. CLOSE THE MODEL AFTER EACH FRAME
+            3. STARTUP THE MODEL ON FRAGMENT CREATION
+            4. RUN MODEL SETUP ON BACKGROUND THREAD
+        */
+        val poseOptions = PoseDetectorOptions.Builder()
+            .setDetectorMode(PoseDetectorOptions.STREAM_MODE)
+            .build()
         val poseDetector = PoseDetection.getClient(poseOptions)
 
         val analysisUseCase = ImageAnalysis.Builder().build()
 
-        analysisUseCase?.setAnalyzer(
+        analysisUseCase.setAnalyzer(
             cameraExecutor,
 
             ImageAnalysis.Analyzer { image: ImageProxy ->
@@ -156,7 +164,7 @@ class ShoulderPressFragment : Fragment(){
 
                         // Run inference on the input image and analyze the frame for feedback
                         poseDetector.process(imageToUse).continueWith { task ->
-                            val pose = task.getResult()
+                            val pose = task.result
                             processPose(pose!!)
                         }.addOnCompleteListener {
                             // Close the CameraX image so another can be inputted and prevent hanging
