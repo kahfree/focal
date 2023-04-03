@@ -28,8 +28,6 @@ class RegisterFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         _fragmentRegisterBinding = FragmentRegisterBinding.inflate(inflater, container, false)
-//        database = FirebaseDatabase.getInstance().getReference("Users")
-//        database.get().addOnSuccessListener { numUsers = it.children.count() }
         FocalDB.getNumUsers {size ->
             if(size != null)
                 numUsers = size

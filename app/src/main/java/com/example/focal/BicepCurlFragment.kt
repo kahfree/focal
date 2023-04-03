@@ -28,6 +28,8 @@ import androidx.navigation.fragment.findNavController
 import com.example.focal.databinding.FragmentBicepCurl2Binding
 import com.example.focal.databinding.FragmentShoulderPressBinding
 import com.example.focal.databinding.FragmentSquatBinding
+import com.example.focal.enums.Exercises
+import com.example.focal.enums.Joints
 import com.example.focal.helper.ExerciseAnalysis
 import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.common.InputImage
@@ -65,7 +67,7 @@ class BicepCurlFragment : Fragment(){
     private var topOfMovementReached : Boolean = false
     private lateinit var curlFeedback : HashMap<String,String>
     private var userID : String = ""
-    private val exerciseAnalysis: ExerciseAnalysis = ExerciseAnalysis("elbow","bicep curl")
+    private val exerciseAnalysis: ExerciseAnalysis = ExerciseAnalysis(Joints.ELBOW,Exercises.BICEP_CURL)
 
 
     override fun onCreateView(

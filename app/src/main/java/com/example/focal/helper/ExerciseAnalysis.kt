@@ -1,16 +1,18 @@
 package com.example.focal.helper
 
 import android.util.Log
+import com.example.focal.enums.Exercises
+import com.example.focal.enums.Joints
 import com.google.mlkit.vision.pose.Pose
 import com.google.mlkit.vision.pose.PoseLandmark
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
-class ExerciseAnalysis(var jointType: String, var exercise: String) {
+class ExerciseAnalysis(var jointType: Joints, var exercise: Exercises) {
 
     fun getJointLandmarks(pose : Pose) : HashMap<String,PoseLandmark?> {
         when(jointType){
-            "knee" -> {
+            Joints.KNEE -> {
                 return hashMapOf(
                     "left hip" to pose.getPoseLandmark(PoseLandmark.LEFT_ANKLE),
                     "right hip" to pose.getPoseLandmark(PoseLandmark.RIGHT_ANKLE),
@@ -20,7 +22,7 @@ class ExerciseAnalysis(var jointType: String, var exercise: String) {
                     "right elbow" to pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
                 )
             }
-            "shoulder" -> {
+            Joints.SHOULDER -> {
                 return hashMapOf(
                     "left elbow" to pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW),
                     "right elbow" to pose.getPoseLandmark(PoseLandmark.RIGHT_ELBOW),
@@ -30,7 +32,7 @@ class ExerciseAnalysis(var jointType: String, var exercise: String) {
                     "right hip" to pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
                 )
             }
-            "elbow" -> {
+            Joints.ELBOW -> {
                 return hashMapOf(
                     "left wrist" to pose.getPoseLandmark(PoseLandmark.LEFT_WRIST),
                     "right wrist" to pose.getPoseLandmark(PoseLandmark.RIGHT_WRIST),
@@ -49,7 +51,7 @@ class ExerciseAnalysis(var jointType: String, var exercise: String) {
 
     fun getFeedbackLandmarks(pose : Pose) : HashMap<String,PoseLandmark?> {
         when(exercise){
-            "squat" -> {
+            Exercises.SQUAT -> {
                 return hashMapOf(
                     "left ankle" to pose.getPoseLandmark(PoseLandmark.LEFT_ANKLE),
                     "right ankle" to pose.getPoseLandmark(PoseLandmark.RIGHT_ANKLE),
@@ -60,7 +62,7 @@ class ExerciseAnalysis(var jointType: String, var exercise: String) {
                     "right knee" to pose.getPoseLandmark(PoseLandmark.RIGHT_KNEE)
                 )
             }
-            "shoulder press" -> {
+            Exercises.SHOULDER_PRESS -> {
                 return hashMapOf(
                     "left elbow" to pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW),
                     "right elbow" to pose.getPoseLandmark(PoseLandmark.RIGHT_ELBOW),
@@ -72,7 +74,7 @@ class ExerciseAnalysis(var jointType: String, var exercise: String) {
                     "right hip" to pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
                 )
             }
-            "bicep curl" -> {
+            Exercises.BICEP_CURL -> {
                 return hashMapOf(
                     "left elbow" to pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW),
                     "right elbow" to pose.getPoseLandmark(PoseLandmark.RIGHT_ELBOW),
@@ -91,13 +93,13 @@ class ExerciseAnalysis(var jointType: String, var exercise: String) {
 
     fun checkExercise(jointAngle: Double): Boolean{
         when(exercise){
-            "squat" -> {
+            Exercises.SQUAT -> {
                 return jointAngle in 20.0..100.0
             }
-            "shoulder press" -> {
+            Exercises.SHOULDER_PRESS -> {
                 return jointAngle in 45.0..180.0
             }
-            "bicep curl" -> {
+            Exercises.BICEP_CURL -> {
                 return jointAngle in 20.0..170.0
             }
             else -> {
