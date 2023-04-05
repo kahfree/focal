@@ -2,10 +2,11 @@ package com.example.focal
 
 import android.annotation.SuppressLint
 import android.util.Log
+import com.example.focal.models.Attempt
+import com.example.focal.models.Goal
+import com.example.focal.models.User
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 
 object FocalDB{
     private val database : DatabaseReference = FirebaseDatabase.getInstance().getReference("")
@@ -156,7 +157,7 @@ object FocalDB{
     }
 
     fun addAttempt(userID: String, attempt: Attempt, timestamp: String,
-        callback: (String?) -> Unit) {
+                   callback: (String?) -> Unit) {
         database.child("Attempts").child(userID)
             .child(timestamp).setValue(attempt).addOnSuccessListener {
                 callback("Attempt of timestamp $timestamp has been logged")

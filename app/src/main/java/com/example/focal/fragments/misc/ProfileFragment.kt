@@ -1,4 +1,4 @@
-package com.example.focal
+package com.example.focal.fragments.misc
 
 import android.os.Bundle
 import android.util.Log
@@ -6,11 +6,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.focal.databinding.FragmentGoalBinding
-import com.example.focal.databinding.FragmentPostExerciseDashboardBinding
+import com.example.focal.FocalDB
 import com.example.focal.databinding.FragmentProfileBinding
+import com.example.focal.models.Attempt
+import com.example.focal.models.User
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -30,17 +30,17 @@ class ProfileFragment : Fragment() {
         super.onCreate(savedInstanceState)
         userID = requireArguments().getString("userID")!!
 
-        FocalDB.getUserByID(userID){ u ->
-            if(u != null)
+        FocalDB.getUserByID(userID) { u ->
+            if (u != null)
                 user = u
             else
-                Log.e("User Profile","User object returned null")
+                Log.e("User Profile", "User object returned null")
         }
-        FocalDB.getAttempts(userID){attempts ->
-            if(attempts != null)
+        FocalDB.getAttempts(userID) { attempts ->
+            if (attempts != null)
                 attemptList = attempts
             else
-                Log.e("User Profile","Failed to get attempts")
+                Log.e("User Profile", "Failed to get attempts")
         }
     }
 

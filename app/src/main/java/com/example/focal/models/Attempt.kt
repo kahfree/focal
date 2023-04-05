@@ -1,4 +1,4 @@
-package com.example.focal
+package com.example.focal.models
 
 import androidx.camera.core.ImageProxy
 import java.sql.Timestamp

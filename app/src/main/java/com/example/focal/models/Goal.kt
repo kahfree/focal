@@ -1,4 +1,4 @@
-package com.example.focal
+package com.example.focal.models
 
 import java.util.Date
 data class Goal(val goalID : String? = null, val userID: String? = null, val exercise : String? = null, val goal : Float? = null, var current: Float? = null,val deadline: String? = null, val title: String? = null,

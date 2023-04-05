@@ -1,4 +1,4 @@
-package com.example.focal.data.model
+package com.example.focal.models
 
 /**
  * Data class that captures user information for logged in users retrieved from LoginRepository

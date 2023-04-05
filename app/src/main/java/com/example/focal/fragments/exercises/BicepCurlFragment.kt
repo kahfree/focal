@@ -1,17 +1,12 @@
-package com.example.focal
+package com.example.focal.fragments.exercises
 
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
-import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -22,12 +17,10 @@ import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.os.HandlerCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.focal.R
 import com.example.focal.databinding.FragmentBicepCurl2Binding
-import com.example.focal.databinding.FragmentShoulderPressBinding
-import com.example.focal.databinding.FragmentSquatBinding
 import com.example.focal.enums.Exercises
 import com.example.focal.enums.Joints
 import com.example.focal.helper.ExerciseAnalysis
@@ -37,17 +30,10 @@ import com.google.mlkit.vision.pose.Pose
 import com.google.mlkit.vision.pose.PoseDetection
 import com.google.mlkit.vision.pose.PoseLandmark
 import com.google.mlkit.vision.pose.defaults.PoseDetectorOptions
-import java.util.LinkedList
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import org.tensorflow.lite.task.gms.vision.detector.Detection
-import java.nio.ByteBuffer
 import java.time.Duration
-import java.time.LocalDateTime
 import java.time.LocalTime
-import kotlin.math.abs
-import kotlin.math.atan2
-import kotlin.math.sqrt
 
 class BicepCurlFragment : Fragment(){
 
@@ -91,7 +77,8 @@ class BicepCurlFragment : Fragment(){
                 activity?.let {
                     ActivityCompat.requestPermissions(
                         it,
-                        REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+                        REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
+                    )
                 }
             }
         }

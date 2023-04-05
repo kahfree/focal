@@ -1,7 +1,6 @@
-package com.example.focal.ui.login
+package com.example.focal.login
 
 import android.annotation.SuppressLint
-import androidx.lifecycle.ViewModelProvider
 import androidx.fragment.app.Fragment
 import android.os.Bundle
 import android.util.Log
@@ -13,14 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
 import com.example.focal.*
 import com.example.focal.databinding.FragmentLoginBinding
-
-
-import com.google.android.gms.tasks.Tasks
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
+import com.example.focal.models.User
 
 class LoginFragment : Fragment() {
 

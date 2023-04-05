@@ -1,4 +1,4 @@
-package com.example.focal
+package com.example.focal.fragments.misc
 
 import android.os.Build
 import android.os.Bundle
@@ -8,13 +8,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
+import com.example.focal.FocalDB
 import com.example.focal.databinding.FragmentPostExerciseDashboardBinding
-import com.example.focal.databinding.FragmentSquatBinding
+import com.example.focal.models.Attempt
+import com.example.focal.models.Goal
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 
@@ -51,29 +50,38 @@ class PostExerciseDashboard : Fragment() {
             fragmentDashboardBinding.textViewExerciseQuality.text = quality + "%"
             fragmentDashboardBinding.textViewFeedback.text =
                 feedbackToGive.entries.joinToString("\n")
-            FocalDB.getAttempts(userID){attempts ->
-                if(attempts != null)
-                    fragmentDashboardBinding.textViewPreviousAttempts.text = attempts.map { it -> it?.display() }.joinToString("\n\n")
+            FocalDB.getAttempts(userID) { attempts ->
+                if (attempts != null)
+                    fragmentDashboardBinding.textViewPreviousAttempts.text =
+                        attempts.map { it -> it?.display() }.joinToString("\n\n")
                 else
-                    Log.e("User Profile","Failed to get attempts")
+                    Log.e("User Profile", "Failed to get attempts")
             }
         }
 
-        FocalDB.getGoalsByExercise(userID, exercise!!){goals ->
+        FocalDB.getGoalsByExercise(userID, exercise!!) { goals ->
             goals?.forEach {
                 val goal: Goal = it!!
-                if(it.title == "Max Depth"){
-                    Log.e("Goal updater","In the max depth thing")
+                if (it.title == "Max Depth") {
+                    Log.e("Goal updater", "In the max depth thing")
                     if (requireArguments().getFloat("maxDepth") <= goal.current!!) {
-                        FocalDB.updateGoalProgress(userID, requireArguments().getFloat("maxDepth"),goal){
-                            Log.e("Updated Goal",it!!)
+                        FocalDB.updateGoalProgress(
+                            userID,
+                            requireArguments().getFloat("maxDepth"),
+                            goal
+                        ) {
+                            Log.e("Updated Goal", it!!)
                         }
                     }
-                }else if (it.title == "Quality"){
-                    Log.e("Goal updater","In the quality thing")
+                } else if (it.title == "Quality") {
+                    Log.e("Goal updater", "In the quality thing")
                     if (requireArguments().getFloat("exerciseQuality") >= goal.current!!) {
-                        FocalDB.updateGoalProgress(userID, requireArguments().getFloat("maxDepth"),goal){
-                            Log.e("Updated Goal",it!!)
+                        FocalDB.updateGoalProgress(
+                            userID,
+                            requireArguments().getFloat("maxDepth"),
+                            goal
+                        ) {
+                            Log.e("Updated Goal", it!!)
                         }
                     }
                 }
@@ -83,8 +91,8 @@ class PostExerciseDashboard : Fragment() {
         val attemptTimestamp = LocalDateTime.now().format(formatter)
         val newAttempt = Attempt(exercise, statOne.toFloat(),quality.toFloat(),attemptFeedback)
 
-        FocalDB.addAttempt(userID,newAttempt, attemptTimestamp){
-            Log.e("Add Attempt","$it")
+        FocalDB.addAttempt(userID, newAttempt, attemptTimestamp) {
+            Log.e("Add Attempt", "$it")
         }
     }
 

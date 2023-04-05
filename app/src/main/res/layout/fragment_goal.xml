@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".GoalFragment"
+    tools:context=".fragments.goals.GoalFragment"
     xmlns:card_view="http://schemas.android.com/apk/res-auto">
         <Button
             android:id="@+id/button_addGoal"
