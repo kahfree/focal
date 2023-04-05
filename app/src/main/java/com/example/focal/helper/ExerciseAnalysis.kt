@@ -91,6 +91,43 @@ class ExerciseAnalysis(var jointType: Joints, var exercise: Exercises) {
         }
     }
 
+    fun getAverageJointAngle(pose: Pose) : Double{
+        when(jointType){
+            Joints.KNEE -> {
+                val jointLandmarks = this.getJointLandmarks(pose)
+
+                //Get angles of each joint
+                val leftElbowAngle = ExerciseAnalysis.getAngle(jointLandmarks["left shoulder"]!!, jointLandmarks["left elbow"]!!, jointLandmarks["left wrist"]!!)
+                val rightElbowAngle = ExerciseAnalysis.getAngle(jointLandmarks["right shoulder"]!!, jointLandmarks["right elbow"]!!, jointLandmarks["right wrist"]!!)
+                //Get average values between both joints
+                return (leftElbowAngle + rightElbowAngle) / 2
+            }
+            Joints.SHOULDER -> {
+                val jointLandmarks = this.getJointLandmarks(pose)
+
+                //Get angles of each joint
+                val leftArmpitAngle = ExerciseAnalysis.getAngle(jointLandmarks["left elbow"]!!, jointLandmarks["left shoulder"]!!, jointLandmarks["left hip"]!!)
+                val rightArmpitAngle = ExerciseAnalysis.getAngle(jointLandmarks["right elbow"]!!, jointLandmarks["right shoulder"]!!, jointLandmarks["right hip"]!!)
+
+                //Get average values between both joints
+                return (leftArmpitAngle + rightArmpitAngle) / 2
+            }
+            Joints.ELBOW -> {
+                val landmarkList = this.getJointLandmarks(pose)
+
+                //Get angles of each joint
+                val LkneeAngle = ExerciseAnalysis.getAngle(landmarkList["left ankle"]!!,landmarkList["left knee"]!!,landmarkList["left hip"]!!)
+                val RkneeAngle = ExerciseAnalysis.getAngle(landmarkList["right ankle"]!!,landmarkList["right knee"]!!,landmarkList["right hip"]!!)
+
+                return (LkneeAngle + RkneeAngle) / 2
+            }
+            else ->{
+                Log.e("ExerciseAnalysis","Something went wrong in the getAverageJointAngle method")
+                return 0.0
+            }
+        }
+    }
+
     fun checkExercise(jointAngle: Double): Boolean{
         when(exercise){
             Exercises.SQUAT -> {

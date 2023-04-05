@@ -29,7 +29,7 @@ class GoalTemplateFragment(goal: Goal) : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentGoalTemplateBinding.inflate(inflater, container, false)
         return binding.root
 
