@@ -282,6 +282,7 @@ class BicepCurlFragment : Fragment(){
                 it1.baseContext, it)
         } == PackageManager.PERMISSION_GRANTED
     }
+    //A companion object is where you can have static variables and methods in a class
     companion object {
         private const val TAG = "CameraXApp"
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
@@ -291,12 +292,15 @@ class BicepCurlFragment : Fragment(){
                 Manifest.permission.CAMERA,
                 Manifest.permission.RECORD_AUDIO
             ).apply {
+                //If the build version is less than or equal to the latest public release
                 if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                    //Also request the permission to write to external storage
                     add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 }
             }.toTypedArray()
     }
 
+    //Event called when user responds to permissions request
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults:

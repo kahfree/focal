@@ -25,7 +25,6 @@ class ProfileFragment : Fragment() {
     private var user : User? = null
     private lateinit var userID: String
 
-    private lateinit var database : DatabaseReference
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         userID = requireArguments().getString("userID")!!

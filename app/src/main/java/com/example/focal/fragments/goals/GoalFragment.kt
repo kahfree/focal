@@ -20,8 +20,6 @@ class GoalFragment : Fragment() {
 
     private var _binding: FragmentGoalBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
     private var goalList : MutableList<Goal?> = mutableListOf()
     private lateinit var userID: String
@@ -41,7 +39,6 @@ class GoalFragment : Fragment() {
     ): View {
         _binding = FragmentGoalBinding.inflate(inflater, container, false)
         return binding.root
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,10 +49,9 @@ class GoalFragment : Fragment() {
                 putString("userID", userID)
             })
         }
-        val userID = requireArguments().getString("userID")!!
+        requireArguments().getString("userID")!!
         val fragManager = parentFragmentManager
         val trans = fragManager.beginTransaction()
-        var index= 0
         GlobalScope.launch {
         suspend {
             delay(100)

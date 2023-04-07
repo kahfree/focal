@@ -40,8 +40,6 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         (activity as AppCompatActivity).actionBar?.title = "Login"
-        val usernameEditText = binding.username
-        val passwordEditText = binding.password
         val loginButton = binding.login
         val loadingProgressBar = binding.loading
 

@@ -18,7 +18,6 @@ import java.time.format.DateTimeFormatter
 
 
 class PostExerciseDashboard : Fragment() {
-    private var TAG = "PostExerciseDashboardFragment"
     private var _fragmentDashboardBinding: FragmentPostExerciseDashboardBinding? = null
     private lateinit var database : DatabaseReference
     private val fragmentDashboardBinding
@@ -27,7 +26,7 @@ class PostExerciseDashboard : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _fragmentDashboardBinding = FragmentPostExerciseDashboardBinding.inflate(inflater, container, false)
         return fragmentDashboardBinding.root
     }
@@ -42,9 +41,7 @@ class PostExerciseDashboard : Fragment() {
         val quality = String.format("%.2f", requireArguments().getFloat("exerciseQuality"))
         val attemptFeedback = feedbackToGive.keys.joinToString(",")
         val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
-        var attemptText = ""
 
-        val previousAttempts = fragmentDashboardBinding.textViewPreviousAttempts
         activity?.runOnUiThread {
             fragmentDashboardBinding.textViewMaxDepth.text = statOne + "°"
             fragmentDashboardBinding.textViewExerciseQuality.text = quality + "%"
@@ -53,7 +50,7 @@ class PostExerciseDashboard : Fragment() {
             FocalDB.getAttempts(userID) { attempts ->
                 if (attempts != null)
                     fragmentDashboardBinding.textViewPreviousAttempts.text =
-                        attempts.map { it -> it?.display() }.joinToString("\n\n")
+                        attempts.map { it?.display() }.joinToString("\n\n")
                 else
                     Log.e("User Profile", "Failed to get attempts")
             }

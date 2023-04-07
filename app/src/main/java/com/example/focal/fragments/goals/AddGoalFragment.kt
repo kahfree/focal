@@ -27,7 +27,7 @@ class AddGoalFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _binding = FragmentAddGoalBinding.inflate(inflater, container, false)
         userID = requireArguments().getString("userID")!!
@@ -43,13 +43,10 @@ class AddGoalFragment : Fragment() {
                 val title: String = binding.title.selectedItem.toString()
                 val goal: Float = binding.goal.text.toString().toFloat()
                 val deadline: String = binding.deadline.text.toString()
-                var current = if(title.toString() == "Max Depth")
-                    180f
-                else
-                    0f
+                val current = if(title.toString() == "Max Depth") 180f else 0f
                 val newGoal: Goal = Goal("G3",userID,exercise,goal,current,deadline,title,"Ongoing")
-//                database.child(userID).child(exercise).child(title).setValue(newGoal)
                 FocalDB.addGoal(newGoal) { Log.e("Add Goal", "Goal has been added successfully") }
+
                 putString("userID", userID)
             })
             Toast.makeText(requireContext(),"Goal has been added!",Toast.LENGTH_SHORT).show()
