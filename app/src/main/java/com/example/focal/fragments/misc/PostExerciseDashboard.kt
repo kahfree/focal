@@ -19,7 +19,6 @@ import java.time.format.DateTimeFormatter
 
 class PostExerciseDashboard : Fragment() {
     private var _fragmentDashboardBinding: FragmentPostExerciseDashboardBinding? = null
-    private lateinit var database : DatabaseReference
     private val fragmentDashboardBinding
         get() = _fragmentDashboardBinding!!
 

@@ -236,7 +236,7 @@ class SquatFragment : Fragment(){
         val leftKnee = feedbackLandmark["left knee"]
         val rightKnee = feedbackLandmark["right knee"]
         val leftHip = feedbackLandmark["left hip"]
-        var shoulderDistance = 0f
+        val shoulderDistance: Float
         var feetDistance = 0f
 
         //The stance should be the same width or wider than the shoulders
@@ -265,7 +265,6 @@ class SquatFragment : Fragment(){
                     "To prevent back injury, keep your back between 90 and 40 degrees to the floor"
                 )
             }
-//                feedback.add("Don't lean too far forward")
             else if(backAngle > 90)
                 feedback.add("Don't lean too far back")
         }

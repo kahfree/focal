@@ -10,7 +10,6 @@ import com.example.focal.FocalDB
 import com.example.focal.databinding.FragmentProfileBinding
 import com.example.focal.models.Attempt
 import com.example.focal.models.User
-import com.google.firebase.database.DatabaseReference
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

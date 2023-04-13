@@ -14,9 +14,6 @@ import com.example.focal.databinding.FragmentGoalTemplateBinding
 import com.example.focal.models.Goal
 
 
-/**
- * A simple [Fragment] subclass as the second destination in the navigation.
- */
 class GoalTemplateFragment(goal: Goal) : Fragment() {
 
     private var _binding: FragmentGoalTemplateBinding? = null

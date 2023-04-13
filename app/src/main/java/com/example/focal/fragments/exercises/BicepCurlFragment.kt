@@ -88,7 +88,7 @@ class BicepCurlFragment : Fragment(){
         }
         timeRemaining = LocalTime.now().plusSeconds(20)
         fragmentBicepCurlBinding.buttonDashboard.visibility = View.INVISIBLE
-        curlFeedback = HashMap<String, String>()
+        curlFeedback = HashMap()
         // Initialize our background executor
         cameraExecutor = Executors.newSingleThreadExecutor()
         userID = requireArguments().getString("userID").toString()
@@ -96,7 +96,7 @@ class BicepCurlFragment : Fragment(){
         goodCurl = 0f
         badCurl = 0f
         topOfMovementReached = false
-        curlFeedback = HashMap<String,String>()
+        curlFeedback = HashMap()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

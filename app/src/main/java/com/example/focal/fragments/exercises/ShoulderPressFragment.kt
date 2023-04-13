@@ -86,7 +86,7 @@ class ShoulderPressFragment : Fragment(){
         }
         timeRemaining = LocalTime.now().plusSeconds(20)
         fragmentShoulderPressBinding.buttonDashboard.visibility = View.INVISIBLE
-        squatFeedback = HashMap<String, String>()
+        squatFeedback = HashMap()
         // Initialize our background executor
         cameraExecutor = Executors.newSingleThreadExecutor()
         userID = requireArguments().getString("userID")!!
@@ -94,7 +94,7 @@ class ShoulderPressFragment : Fragment(){
         goodSquat = 0f
         badSquat = 0f
         topOfMovementReached = false
-        squatFeedback = HashMap<String,String>()
+        squatFeedback = HashMap()
 
 
     }
@@ -249,9 +249,9 @@ class ShoulderPressFragment : Fragment(){
         val rightWrist = feedbackLandmarks["right wrist"]
         val leftHip = feedbackLandmarks["left hip"]
         val rightHip = feedbackLandmarks["right hip"]
-        var shoulderDistance = 0f
-        var elbowDistance = 0f
-        var wristDistance = 0f
+        val shoulderDistance: Float
+        val elbowDistance: Float
+        val wristDistance: Float
 
         //The stance should be the same width or wider than the shoulders
         if(leftElbow != null && rightElbow != null && leftShoulder != null && rightShoulder != null && leftWrist != null && rightWrist != null) {
