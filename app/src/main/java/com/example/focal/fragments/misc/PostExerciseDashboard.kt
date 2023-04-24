@@ -47,9 +47,11 @@ class PostExerciseDashboard : Fragment() {
             fragmentDashboardBinding.textViewFeedback.text =
                 feedbackToGive.entries.joinToString("\n")
             FocalDB.getAttempts(userID) { attempts ->
-                if (attempts != null)
+                if (attempts != null) {
+
                     fragmentDashboardBinding.textViewPreviousAttempts.text =
-                        attempts.map { it?.display() }.joinToString("\n\n")
+                        attempts.filter { attempt -> attempt!!.exercise == exercise  }.map { it?.display() }.joinToString("\n\n")
+                }
                 else
                     Log.e("User Profile", "Failed to get attempts")
             }
