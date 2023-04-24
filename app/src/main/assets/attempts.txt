@@ -1,2 +1,0 @@
-1,1,Squat,28-01-2023 12:30:00,40.34,73.56,Knees Out!-Wider Stance!
-2,1,Squat,28-01-2023 12:34:00,36.26,77.32,Wider Stance!
