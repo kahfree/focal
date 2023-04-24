@@ -20,3 +20,11 @@ email:`gwagon@gmail.com`
 password:`test22`
 
 <img src="https://user-images.githubusercontent.com/38580052/234067920-a8cb9d6f-a73e-4b75-a8f1-d53e7f7c92a9.png" width="30%">
+
+## How to use
+1. Open App.
+2. Login with details (Or register).
+3. Upon successful login you will be brought to the home screen. From here you can go to the profile, the goals, or choose one of three exercises to analyze.
+4. Doing exercise analysis will have you performing the exercise for 20 seconds, then you can view the post-exercise dashboard.
+5. The profile is read-only.
+6. Goals can be made and completed, the system updates them after every execise analysis attempt.
