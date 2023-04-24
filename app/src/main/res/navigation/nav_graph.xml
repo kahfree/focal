@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/HomeFragment"
-        android:name="com.example.focal.FirstFragment"
+        android:name="com.example.focal.fragments.misc.HomeFragment"
         android:label="@string/home_fragment_label"
         tools:layout="@layout/fragment_first">
 
@@ -32,7 +32,7 @@
     </fragment>
     <fragment
         android:id="@+id/GoalFragment"
-        android:name="com.example.focal.GoalFragment"
+        android:name="com.example.focal.fragments.goals.GoalFragment"
         android:label="@string/goal_fragment_label"
         tools:layout="@layout/fragment_goal">
 
@@ -48,7 +48,7 @@
     </fragment>
     <fragment
         android:id="@+id/ProfileFragment"
-        android:name="com.example.focal.ProfileFragment"
+        android:name="com.example.focal.fragments.misc.ProfileFragment"
         android:label="Profile"
         tools:layout="@layout/fragment_profile" >
         <action
@@ -60,7 +60,7 @@
     </fragment>
     <fragment
         android:id="@+id/SquatFragment"
-        android:name="com.example.focal.SquatFragment"
+        android:name="com.example.focal.fragments.exercises.SquatFragment"
         android:label="Squat Detection"
         tools:layout="@layout/fragment_squat" >
         <action
@@ -75,7 +75,7 @@
     </fragment>
     <fragment
         android:id="@+id/LoginFragment"
-        android:name="com.example.focal.ui.login.LoginFragment"
+        android:name="com.example.focal.login.LoginFragment"
         android:label="Login"
         tools:layout="@layout/fragment_login" >
         <action
@@ -87,7 +87,7 @@
     </fragment>
     <fragment
         android:id="@+id/RegisterFragment"
-        android:name="com.example.focal.RegisterFragment"
+        android:name="com.example.focal.fragments.misc.RegisterFragment"
         android:label="Register"
         tools:layout="@layout/fragment_register" >
         <action
@@ -96,7 +96,7 @@
     </fragment>
     <fragment
         android:id="@+id/postExerciseDashboard"
-        android:name="com.example.focal.PostExerciseDashboard"
+        android:name="com.example.focal.fragments.misc.PostExerciseDashboard"
         android:label="Post-Exercise Dashboard"
         tools:layout="@layout/fragment_post_exercise_dashboard" >
         <action
@@ -122,7 +122,7 @@
     </fragment>
     <fragment
         android:id="@+id/shoulderPressFragment"
-        android:name="com.example.focal.ShoulderPressFragment"
+        android:name="com.example.focal.fragments.exercises.ShoulderPressFragment"
         android:label="fragment_shoulder_press"
         tools:layout="@layout/fragment_shoulder_press" >
         <action
@@ -134,7 +134,7 @@
     </fragment>
     <fragment
         android:id="@+id/bicepCurlFragment"
-        android:name="com.example.focal.BicepCurlFragment"
+        android:name="com.example.focal.fragments.exercises.BicepCurlFragment"
         android:label="fragment_bicep_curl2"
         tools:layout="@layout/fragment_bicep_curl2" >
         <action
@@ -143,12 +143,12 @@
     </fragment>
     <fragment
         android:id="@+id/goalTemplateFragment"
-        android:name="com.example.focal.GoalTemplateFragment"
+        android:name="com.example.focal.fragments.goals.GoalTemplateFragment"
         android:label="fragment_goal_template"
         tools:layout="@layout/fragment_goal_template" />
     <fragment
         android:id="@+id/addGoalFragment"
-        android:name="com.example.focal.AddGoalFragment"
+        android:name="com.example.focal.fragments.goals.AddGoalFragment"
         android:label="fragment_add_goal"
         tools:layout="@layout/fragment_add_goal" >
         <action

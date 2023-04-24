@@ -1,4 +1,4 @@
-package com.example.focal
+package com.example.focal.fragments.goals
 
 import android.os.Bundle
 import android.util.Log
@@ -8,14 +8,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.focal.FocalDB
+import com.example.focal.R
 import com.example.focal.databinding.FragmentGoalTemplateBinding
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
+import com.example.focal.models.Goal
 
 
-/**
- * A simple [Fragment] subclass as the second destination in the navigation.
- */
 class GoalTemplateFragment(goal: Goal) : Fragment() {
 
     private var _binding: FragmentGoalTemplateBinding? = null
@@ -28,7 +26,7 @@ class GoalTemplateFragment(goal: Goal) : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentGoalTemplateBinding.inflate(inflater, container, false)
         return binding.root
 
@@ -38,7 +36,7 @@ class GoalTemplateFragment(goal: Goal) : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.complete.setOnClickListener {
-            FocalDB.removeGoal(goal1){ Log.e("Remove Goal","$it")}
+            FocalDB.removeGoal(goal1) { Log.e("Remove Goal", "$it") }
             findNavController().navigate(R.id.action_GoalFragment_to_HomeFragment, Bundle().apply {
                 putString("userID", goal1.userID)
             })

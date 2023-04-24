@@ -1,17 +1,12 @@
-package com.example.focal
+package com.example.focal.fragments.exercises
 
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
-import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -22,11 +17,12 @@ import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.os.HandlerCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.focal.R
 import com.example.focal.databinding.FragmentShoulderPressBinding
-import com.example.focal.databinding.FragmentSquatBinding
+import com.example.focal.enums.Exercises
+import com.example.focal.enums.Joints
 import com.example.focal.helper.ExerciseAnalysis
 import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.common.InputImage
@@ -34,17 +30,11 @@ import com.google.mlkit.vision.pose.Pose
 import com.google.mlkit.vision.pose.PoseDetection
 import com.google.mlkit.vision.pose.PoseLandmark
 import com.google.mlkit.vision.pose.defaults.PoseDetectorOptions
-import java.util.LinkedList
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import org.tensorflow.lite.task.gms.vision.detector.Detection
-import java.nio.ByteBuffer
 import java.time.Duration
-import java.time.LocalDateTime
 import java.time.LocalTime
 import kotlin.math.abs
-import kotlin.math.atan2
-import kotlin.math.sqrt
 
 class ShoulderPressFragment : Fragment(){
 
@@ -52,11 +42,13 @@ class ShoulderPressFragment : Fragment(){
     private var _fragmentShoulderPressBinding: FragmentShoulderPressBinding? = null
     private val fragmentShoulderPressBinding
         get() = _fragmentShoulderPressBinding!!
-
+    //Variables to run exercise analysis
     private lateinit var cameraExecutor: ExecutorService
     private var preview: Preview? = null
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
+    private val exerciseAnalysis: ExerciseAnalysis = ExerciseAnalysis(Joints.SHOULDER,Exercises.SHOULDER_PRESS)
+    //Variables to log and track the exercise analysis
     private var timeRemaining : LocalTime? = null
     private var maxDepth : Float = 361f
     private var goodSquat : Float = 0f
@@ -64,8 +56,8 @@ class ShoulderPressFragment : Fragment(){
     private var topOfMovementReached : Boolean = false
     private lateinit var squatFeedback : HashMap<String,String>
     private var userID : String = ""
-    private val exerciseAnalysis: ExerciseAnalysis = ExerciseAnalysis("shoulder","shoulder press")
 
+    //Adds the binding so all UI elements can be accessed
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -74,7 +66,7 @@ class ShoulderPressFragment : Fragment(){
         _fragmentShoulderPressBinding = FragmentShoulderPressBinding.inflate(inflater, container, false)
         return fragmentShoulderPressBinding.root
     }
-
+    //Initialise all variables
     @SuppressLint("MissingPermission", "NewApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -87,13 +79,14 @@ class ShoulderPressFragment : Fragment(){
                 activity?.let {
                     ActivityCompat.requestPermissions(
                         it,
-                        REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+                        REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
+                    )
                 }
             }
         }
         timeRemaining = LocalTime.now().plusSeconds(20)
         fragmentShoulderPressBinding.buttonDashboard.visibility = View.INVISIBLE
-        squatFeedback = HashMap<String, String>()
+        squatFeedback = HashMap()
         // Initialize our background executor
         cameraExecutor = Executors.newSingleThreadExecutor()
         userID = requireArguments().getString("userID")!!
@@ -101,7 +94,7 @@ class ShoulderPressFragment : Fragment(){
         goodSquat = 0f
         badSquat = 0f
         topOfMovementReached = false
-        squatFeedback = HashMap<String,String>()
+        squatFeedback = HashMap()
 
 
     }
@@ -121,11 +114,10 @@ class ShoulderPressFragment : Fragment(){
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("UnsafeOptInUsageError")
     private fun bindCameraUseCases(){
-
+        //Setup and configure phone camera
         val cameraProvider = cameraProvider ?: throw IllegalStateException("Camera initialization failed.")
-
         val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
-
+        //Configure camera preview window for user
         preview = Preview.Builder()
             .setTargetAspectRatio(AspectRatio.RATIO_4_3)
             .setTargetRotation(fragmentShoulderPressBinding.viewFinder.display.rotation)
@@ -137,60 +129,61 @@ class ShoulderPressFragment : Fragment(){
             3. STARTUP THE MODEL ON FRAGMENT CREATION
             4. RUN MODEL SETUP ON BACKGROUND THREAD
         */
+        //Build and configure pose estimation model
         val poseOptions = PoseDetectorOptions.Builder()
             .setDetectorMode(PoseDetectorOptions.STREAM_MODE)
             .build()
         val poseDetector = PoseDetection.getClient(poseOptions)
-
+        //Setup analysis use case to run pose estimation on each frame
         val analysisUseCase = ImageAnalysis.Builder().build()
 
         analysisUseCase.setAnalyzer(
-            cameraExecutor,
-
-            ImageAnalysis.Analyzer { image: ImageProxy ->
-                try {
-                    // If the time is up display the post-exercise dashboard
-                    if(LocalTime.now().isAfter(timeRemaining)) {
-                        postExerciseDashboard()
+            cameraExecutor
+        ) { image: ImageProxy ->
+            try {
+                // If the time is up display the post-exercise dashboard
+                if (LocalTime.now().isAfter(timeRemaining)) {
+                    postExerciseDashboard()
+                } else {
+                    // Convert the image from a CameraX 'ImageProxy' to an Google 'InputImage'
+                    val imageToUse = InputImage.fromMediaImage(
+                        image.image!!,
+                        image.imageInfo.rotationDegrees
+                    )
+                    // Run inference on the input image and analyze the frame for feedback
+                    poseDetector.process(imageToUse).continueWith { task ->
+                        val pose = task.result
+                        processPose(pose!!)
+                    }.addOnCompleteListener {
+                        // Close the CameraX image so another can be inputted and prevent hanging
+                        image.close()
                     }
-                    else {
-                        // Convert the image from a CameraX 'ImageProxy' to an Google 'InputImage'
-                        val imageToUse = InputImage.fromMediaImage(
-                            image.image!!,
-                            image.imageInfo.rotationDegrees
-                        )
-
-                        // Run inference on the input image and analyze the frame for feedback
-                        poseDetector.process(imageToUse).continueWith { task ->
-                            val pose = task.result
-                            processPose(pose!!)
-                        }.addOnCompleteListener {
-                            // Close the CameraX image so another can be inputted and prevent hanging
-                            image.close()
-                        }
-                    }
-                }catch (e: MlKitException){
-                    Log.e(TAG,"Failed to process image. Error: " + e.localizedMessage)
                 }
-
+            } catch (e: MlKitException) {
+                Log.e(TAG, "Failed to process image. Error: " + e.localizedMessage)
             }
-        )
+        }
+        //Make sure no use cases are already bound
         cameraProvider.unbindAll()
 
         try {
+            //Apply the use cases to the users camera
             camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, analysisUseCase)
+            //Refresh the camera preview for the user
             preview?.setSurfaceProvider(fragmentShoulderPressBinding.viewFinder.surfaceProvider)
         } catch (exc: Exception) {
             Log.e(TAG, "Use case binding failed", exc)
         }
     }
-
+    //Once the time for analysis runs out, variables are packaged up to be sent to post-exercise dashboard
     private fun postExerciseDashboard(){
+        //Check if exercise was perfect quality or not
         if(badSquat == 0f)
             squatFeedback.put("Good Shoulder Press!", "No mistakes were made, keep up the good work!")
         val quality = goodSquat / (goodSquat + badSquat) * 100
+        //Make the button to go to the post-exercise dashboard visible to the user
         activity?.runOnUiThread { fragmentShoulderPressBinding.buttonDashboard.visibility = View.VISIBLE }
-
+        //On button click open post-exercise dashboard with all the variables
         fragmentShoulderPressBinding.buttonDashboard.setOnClickListener {
             findNavController().navigate(R.id.action_shoulderPressFragment_to_postExerciseDashboard, Bundle().apply {
                 putFloat("maxDepth", maxDepth)
@@ -208,35 +201,35 @@ class ShoulderPressFragment : Fragment(){
     private fun processPose(pose: Pose, bitmap: Bitmap? = null){
         try{
 
-            val jointLandmarks = exerciseAnalysis.getJointLandmarks(pose)
-
-            //Get angles of each joint
-            val leftArmpitAngle = ExerciseAnalysis.getAngle(jointLandmarks["left elbow"]!!, jointLandmarks["left shoulder"]!!, jointLandmarks["left hip"]!!)
-            val rightArmpitAngle = ExerciseAnalysis.getAngle(jointLandmarks["right elbow"]!!, jointLandmarks["right shoulder"]!!, jointLandmarks["right hip"]!!)
-
             //Get average values between both joints
-            val avgArmpitAngle = (leftArmpitAngle + rightArmpitAngle) / 2
-
-            var eyes_textview = fragmentShoulderPressBinding.textArmpitAngleValue
-            var timer_textview = fragmentShoulderPressBinding.textTimerValue
+            val avgArmpitAngle = exerciseAnalysis.getAverageJointAngle(pose)
+            //Setup UI to start analysing exercise
+            val eyes_textview = fragmentShoulderPressBinding.textArmpitAngleValue
+            val timer_textview = fragmentShoulderPressBinding.textTimerValue
             val remainingTime = Duration.between(LocalTime.now(),timeRemaining).toSecondsPart()
-
             eyes_textview.setTextColor(Color.GREEN)
-            //Print new values onto labels
+            //As the start of the movement is already at the "deepest" point for the shoulder angle
+            //The max depth stat only starts tracking once the user has reached the top of the movement
+            //This ensures that the max depth is a true representation
             if(topOfMovementReached && avgArmpitAngle < maxDepth) {
                 Log.e("Max Depth", "Recording new max depth from $maxDepth to $avgArmpitAngle")
                 maxDepth = avgArmpitAngle.toFloat()
             }
+            //Print new values onto labels
             activity?.runOnUiThread {
+                //If the angle falls in the right range
                 if(exerciseAnalysis.checkExercise(avgArmpitAngle)) {
+                    //Check its form using the landmarks needed to apply feedback
                     checkForm(exerciseAnalysis.getFeedbackLandmarks(pose))
+                    //Alert the user their angle is good by changing text color
                     eyes_textview.setTextColor(Color.GREEN)
                 }
                 else {
+                    //Let the user know they're not in exercise range
                     fragmentShoulderPressBinding.textFeedback.text = ""
                     eyes_textview.setTextColor(Color.RED)
                 }
-
+                //Update the values on screen
                 eyes_textview.text = String.format("%.1f", avgArmpitAngle)
                 timer_textview.text = remainingTime.toString() + "s"
             }
@@ -247,7 +240,6 @@ class ShoulderPressFragment : Fragment(){
 
     private fun checkForm(feedbackLandmarks : HashMap<String,PoseLandmark?>){
         val feedback : MutableList<String> = mutableListOf()
-        //Check if feet are shoulder-width apart -> "Feet should be shoulder-width or slightly further apart"
         //Get the landmarks needed
         val leftElbow = feedbackLandmarks["left elbow"]
         val rightElbow = feedbackLandmarks["right elbow"]
@@ -257,9 +249,9 @@ class ShoulderPressFragment : Fragment(){
         val rightWrist = feedbackLandmarks["right wrist"]
         val leftHip = feedbackLandmarks["left hip"]
         val rightHip = feedbackLandmarks["right hip"]
-        var shoulderDistance = 0f
-        var elbowDistance = 0f
-        var wristDistance = 0f
+        val shoulderDistance: Float
+        val elbowDistance: Float
+        val wristDistance: Float
 
         //The stance should be the same width or wider than the shoulders
         if(leftElbow != null && rightElbow != null && leftShoulder != null && rightShoulder != null && leftWrist != null && rightWrist != null) {
@@ -281,14 +273,12 @@ class ShoulderPressFragment : Fragment(){
                 )
             }
 
-            val leftArmpitAngle = ExerciseAnalysis.getAngle(leftElbow!!, leftShoulder!!, leftHip!!)
-            val rightArmpitAngle = ExerciseAnalysis.getAngle(rightElbow!!, rightShoulder!!, rightHip!!)
+            val leftArmpitAngle = ExerciseAnalysis.getAngle(leftElbow, leftShoulder, leftHip!!)
+            val rightArmpitAngle = ExerciseAnalysis.getAngle(rightElbow, rightShoulder, rightHip!!)
 
             //Get average values between both joints
             val avgArmpitAngle = (leftArmpitAngle + rightArmpitAngle) / 2
-            //This works, but only if the left arm is above the right
-            //Could workaround by doing another check in statement, but there must be a maths flaw here...
-            //Added the OR clause for the meantime, still doesn't feel right
+
             if((abs(leftWrist.position.y) - abs(rightWrist.position.y)) >= 50 || (abs(rightWrist.position.y) - abs(leftWrist.position.y)) >= 50){
                 feedback.add("Both Arms!")
                 squatFeedback.put(
@@ -330,6 +320,8 @@ class ShoulderPressFragment : Fragment(){
                 it1.baseContext, it)
         } == PackageManager.PERMISSION_GRANTED
     }
+
+    //A companion object is where you can have static variables and methods in a class
     companion object {
         private const val TAG = "CameraXApp"
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
@@ -339,12 +331,15 @@ class ShoulderPressFragment : Fragment(){
                 Manifest.permission.CAMERA,
                 Manifest.permission.RECORD_AUDIO
             ).apply {
+                //If the build version is less than or equal to the latest public release
                 if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                    //Also request the permission to write to external storage
                     add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 }
             }.toTypedArray()
     }
 
+    //Event called when user responds to permissions request
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults:

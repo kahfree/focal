@@ -1,7 +1,6 @@
-package com.example.focal.ui.login
+package com.example.focal.login
 
 import android.annotation.SuppressLint
-import androidx.lifecycle.ViewModelProvider
 import androidx.fragment.app.Fragment
 import android.os.Bundle
 import android.util.Log
@@ -13,18 +12,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
 import com.example.focal.*
 import com.example.focal.databinding.FragmentLoginBinding
-
-
-import com.google.android.gms.tasks.Tasks
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
+import com.example.focal.models.User
 
 class LoginFragment : Fragment() {
 
-    private lateinit var loginViewModel: LoginViewModel
     private var _binding: FragmentLoginBinding? = null
 
     private lateinit var userToLogin : User
@@ -47,12 +38,8 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loginViewModel = ViewModelProvider(this, LoginViewModelFactory())
-            .get(LoginViewModel::class.java)
 
         (activity as AppCompatActivity).actionBar?.title = "Login"
-        val usernameEditText = binding.username
-        val passwordEditText = binding.password
         val loginButton = binding.login
         val loadingProgressBar = binding.loading
 
@@ -74,13 +61,6 @@ class LoginFragment : Fragment() {
         binding.buttonRegister.setOnClickListener {
             findNavController().navigate(R.id.action_LoginFragment_to_RegisterFragment)
         }
-
-        FileService(requireActivity()).resetGoals()
-        FileService(requireActivity()).logGoals()
-        FileService(requireActivity()).resetUsers()
-        FileService(requireActivity()).logUsers()
-        FileService(requireActivity()).resetAttempts()
-        FileService(requireActivity()).logAttempts()
 
     }
 

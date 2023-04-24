@@ -1,4 +1,4 @@
-package com.example.focal
+package com.example.focal.fragments.misc
 
 import android.os.Bundle
 import android.util.Log
@@ -8,11 +8,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.navigation.fragment.findNavController
+import com.example.focal.FocalDB
+import com.example.focal.R
 import com.example.focal.databinding.FragmentRegisterBinding
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import com.example.focal.models.User
 
 
 class RegisterFragment : Fragment() {
@@ -28,13 +27,11 @@ class RegisterFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         _fragmentRegisterBinding = FragmentRegisterBinding.inflate(inflater, container, false)
-//        database = FirebaseDatabase.getInstance().getReference("Users")
-//        database.get().addOnSuccessListener { numUsers = it.children.count() }
-        FocalDB.getNumUsers {size ->
-            if(size != null)
+        FocalDB.getNumUsers { size ->
+            if (size != null)
                 numUsers = size
             else
-                Log.e("Register","Unable to get count of users")
+                Log.e("Register", "Unable to get count of users")
         }
 
         return fragmentRegisterBinding.root
