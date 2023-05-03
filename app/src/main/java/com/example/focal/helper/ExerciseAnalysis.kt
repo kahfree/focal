@@ -93,7 +93,7 @@ class ExerciseAnalysis(var jointType: Joints, var exercise: Exercises) {
 
     fun getAverageJointAngle(pose: Pose) : Double{
         when(jointType){
-            Joints.KNEE -> {
+            Joints.ELBOW -> {
                 val jointLandmarks = this.getJointLandmarks(pose)
 
                 //Get angles of each joint
@@ -112,7 +112,7 @@ class ExerciseAnalysis(var jointType: Joints, var exercise: Exercises) {
                 //Get average values between both joints
                 return (leftArmpitAngle + rightArmpitAngle) / 2
             }
-            Joints.ELBOW -> {
+            Joints.KNEE -> {
                 val landmarkList = this.getJointLandmarks(pose)
 
                 //Get angles of each joint
